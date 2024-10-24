@@ -3,3 +3,4 @@
 /src/main/resources/cryptoconfig.txt
 /src/main/java/Utils/RandomBytesGenerator.class
 /src/main/java/Utils/ToHex.class
+*.class
