@@ -1,4 +1,4 @@
-package srscProject.src.main.java.Utils;
+package DSTP.utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

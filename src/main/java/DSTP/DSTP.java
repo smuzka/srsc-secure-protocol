@@ -1,4 +1,4 @@
-package srscProject.src.main.java;
+package DSTP;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -14,11 +14,11 @@ import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import srscProject.src.main.java.Utils.RandomBytesGenerator;
-import srscProject.src.main.java.Utils.ToHex;
-import srscProject.src.main.java.Utils.ReadFile;
+import DSTP.utils.RandomBytesGenerator;
+import DSTP.utils.ReadFile;
+import DSTP.utils.ToHex;
 
-public class main {
+public class DSTP {
     static Cipher cipher;
     static SecretKeySpec key;
     static IvParameterSpec ivSpec;

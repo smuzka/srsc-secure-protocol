@@ -17,11 +17,11 @@ java -cp target/classes srscProject.src.main.java.main
 
 * compile and run MulticastReceiver
   ```
-  javac -d . srscProject/src/main/java/main.java TestMulticast/MulticastReceiver.java && java -cp . TestMulticast.MulticastReceiver 224.0.0.5 8181
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastReceiver.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastReceiver 224.0.0.5 8181
   ```
 
 
 * compile and run MulticastSender
   ```
-  javac -d . srscProject/src/main/java/main.java TestMulticast/MulticastSender.java && java -cp . TestMulticast.MulticastSender 224.0.0.5 8181 5
+ javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastSender.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastSender 224.0.0.5 8181
   ```
