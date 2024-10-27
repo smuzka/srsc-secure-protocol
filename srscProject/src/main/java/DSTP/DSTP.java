@@ -76,7 +76,10 @@ public class DSTP {
 
             String configMACAlg = variables.get("MAC");
             String configMACKey = variables.get("MACKEY");
-            String configMACKeySize = variables.get("MACKEY_SIZE");
+            int configMACKeySize = Integer.parseInt(variables.get("MACKEY_SIZE"));
+            if (configMACKey.length() * 4 != configMACKeySize) {
+                throw new IllegalArgumentException("MAC key size mismatch");
+            }
 
             hMac = Mac.getInstance(configMACAlg);
             hMacKey = new SecretKeySpec(configMACKey.getBytes(StandardCharsets.UTF_8), configMACAlg);
