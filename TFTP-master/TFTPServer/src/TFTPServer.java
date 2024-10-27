@@ -1,13 +1,24 @@
 import java.net.*;
 import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+
+import DSTP.DSTP;
+import DSTP.EncryptedDatagramSocket;
 
 public class TFTPServer {
 
-	public static void main(String argv[]) {
+	public static void main(String argv[]) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 		try {
 			//use port 6973
-			DatagramSocket sock = new DatagramSocket(6973);
+			EncryptedDatagramSocket sock = new EncryptedDatagramSocket(6973);
 			System.out.println("Server Ready.  Port:  " + sock.getLocalPort());
 
 			// Listen for requests

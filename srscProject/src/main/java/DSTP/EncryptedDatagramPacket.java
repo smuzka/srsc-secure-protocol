@@ -2,6 +2,8 @@ package DSTP;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -25,6 +27,14 @@ public class EncryptedDatagramPacket {
         this.data = buffer.toString();
         String encryptedData = DSTP.encryptString(buffer.toString());
         this.packet = new DatagramPacket(encryptedData.getBytes(), encryptedData.getBytes().length);
+    }
+
+    public EncryptedDatagramPacket(byte[] buffer, int length, SocketAddress address) {
+        this.packet = new DatagramPacket(buffer, length, address);
+    }
+
+    public EncryptedDatagramPacket(byte[] buffer, int length, InetSocketAddress address) {
+        this.packet = new DatagramPacket(buffer, length, address);
     }
 
     public EncryptedDatagramPacket(String data, InetAddress address, int port)
@@ -77,4 +87,21 @@ public class EncryptedDatagramPacket {
     public int getLength() {
         return this.packet.getLength();
     }
+
+    public InetAddress getAddress() {
+        return this.packet.getAddress();
+    }
+
+    public int getPort() {
+        return this.packet.getPort();
+    }
+
+    public void setData(byte[] data, int offset, int length) {
+        this.packet.setData(data, offset, length);
+    }
+
+    public void setSocketAddress(InetSocketAddress address) {
+        this.packet.setSocketAddress(address);
+    }
+
 }

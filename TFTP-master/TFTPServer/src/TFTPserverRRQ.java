@@ -3,10 +3,13 @@ import java.security.MessageDigest;
 import java.io.*;
 import java.util.*;
 
+import DSTP.EncryptedDatagramPacket;
+import DSTP.EncryptedDatagramSocket;
+
 
 class TFTPserverRRQ extends Thread {
 
-	protected DatagramSocket sock;
+	protected EncryptedDatagramSocket sock;
 	protected InetAddress host;
 	protected int port;
 	protected FileInputStream source;
@@ -19,7 +22,7 @@ class TFTPserverRRQ extends Thread {
 		try {
 			req = request;
 			//open new socket with random port num for tranfer
-			sock = new DatagramSocket();
+			sock = new EncryptedDatagramSocket();
 			sock.setSoTimeout(1000);
 			fileName = request.fileName();
 

@@ -1,8 +1,20 @@
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.net.InetAddress;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import DSTP.DSTP;
+import DSTP.EncryptedDatagramPacket;
+import DSTP.EncryptedDatagramSocket;
 
 class TftpException extends Exception {
 	public TftpException() {
@@ -20,8 +32,8 @@ public class TFTPpacket {
 
   // TFTP constants
   public static int tftpPort = 69;
-  public static int maxTftpPakLen=516;
-  public static int maxTftpData=512;
+  public static int maxTftpPakLen=514;
+  public static int maxTftpData=510;
 
   // Tftp opcodes
   protected static final short tftpRRQ=1;
@@ -56,13 +68,14 @@ public class TFTPpacket {
   } 
 
   // Methods to receive packet and convert it to yhe right type(data/ack/read/...)
-  public static TFTPpacket receive(DatagramSocket sock) throws IOException {
+  public static TFTPpacket receive(EncryptedDatagramSocket sock) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
     TFTPpacket in=new TFTPpacket(), retPak=new TFTPpacket();
     //receive data and put them into in.message
-    DatagramPacket inPak = new DatagramPacket(in.message,in.length);
-    sock.receive(inPak); 
-    
-    //Check the opcode in message, then cast the message into the corresponding type
+    EncryptedDatagramPacket inPak = new EncryptedDatagramPacket(in.message,in.length);
+    sock.receive(inPak);
+    in.message = inPak.getData();
+
+      //Check the opcode in message, then cast the message into the corresponding type
     switch (in.get(0)) {
       case tftpRRQ:
     	  retPak=new TFTPread();
@@ -89,8 +102,8 @@ public class TFTPpacket {
   }
   
   //Method to send packet
-  public void send(InetAddress ip, int port, DatagramSocket s) throws IOException {
-    s.send(new DatagramPacket(message,length,ip,port));
+  public void send(InetAddress ip, int port, EncryptedDatagramSocket s) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    s.send(new EncryptedDatagramPacket(new String(message), ip, port));
   }
 
   // DatagramPacket like methods

@@ -2,11 +2,12 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+import DSTP.EncryptedDatagramSocket;
 
 
 class TFTPserverWRQ extends Thread {
 
-	protected DatagramSocket sock;
+	protected EncryptedDatagramSocket sock;
 	protected InetAddress host;
 	protected int port;
 	protected FileOutputStream outFile;
@@ -20,7 +21,7 @@ class TFTPserverWRQ extends Thread {
 	public TFTPserverWRQ(TFTPwrite request) throws TftpException {
 		try {
 			req = request;
-			sock = new DatagramSocket(); // new port for transfer
+			sock = new EncryptedDatagramSocket(); // new port for transfer
 			sock.setSoTimeout(1000);
 
 			host = request.getAddress();

@@ -2,20 +2,30 @@
 
 import java.net.*;
 import java.io.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+
+import DSTP.EncryptedDatagramSocket;
 
 
 class TFTPclientWRQ {
 	protected InetAddress server;
 	protected String fileName;
 	protected String dataMode;
-	public TFTPclientWRQ(InetAddress ip, String name, String mode) {
+	public TFTPclientWRQ(InetAddress ip, String name, String mode) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 		server = ip;
 		fileName = name;
 		dataMode = mode;
 		try {
 			// Create socket and open output file
-			DatagramSocket sock = new DatagramSocket();
+			EncryptedDatagramSocket sock = new EncryptedDatagramSocket();
 			sock.setSoTimeout(2000);
 			int timeoutLimit = 5;
 
