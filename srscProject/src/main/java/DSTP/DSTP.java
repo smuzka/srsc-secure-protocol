@@ -5,6 +5,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
+import java.security.Key;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -14,6 +15,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.Mac;
 
 import DSTP.utils.RandomBytesGenerator;
 import DSTP.utils.ReadFile;
@@ -27,6 +29,9 @@ public class DSTP {
     static byte[] ivBytes;
     static MessageDigest digest;
     static boolean integrityModeHash; // true for hash, false for mac
+
+    static Mac hMac;
+    static Key hMacKey;
 
     public static void init()
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
@@ -69,10 +74,12 @@ public class DSTP {
 
             System.out.println("HMAC mode selected");
 
-            // String configMACAlg = variables.get("MAC");
-            // String configMACKey = variables.get("MACKEY");
-            // String configMACKeySize = variables.get("MACKEY_SIZE");
-            // digest = MessageDigest.getInstance(configHAlg);
+            String configMACAlg = variables.get("MAC");
+            String configMACKey = variables.get("MACKEY");
+            String configMACKeySize = variables.get("MACKEY_SIZE");
+
+            hMac = Mac.getInstance(configMACAlg);
+            hMacKey = new SecretKeySpec(configMACKey.getBytes(StandardCharsets.UTF_8), configMACAlg);
         } else {
             System.out.println("Integrity mode not defined");
             System.exit(0);
@@ -94,6 +101,12 @@ public class DSTP {
 
         } else {
             // hmac
+            hMac.init(hMacKey);
+            hMac.update(plainText.substring(4).getBytes());
+            byte[] hMacByte = hMac.doFinal();
+            String hMacString = ToHex.toHex(hMacByte, hMac.getMacLength()).toString();
+            System.out.println("hMacString: " + hMacString);
+            inputWithH = plainText + hMacString;
         }
         // encryption
         cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
@@ -134,11 +147,13 @@ public class DSTP {
         byte[] plainText = new byte[bufLength - ivBytes.length];
         System.arraycopy(buf, ivBytes.length, plainText, 0, plainText.length);
         String plainTextString = new String(plainText, StandardCharsets.UTF_8);
-        // check integrity
-        if (integrityModeHash) {
-            // Remove the sequence number from the start
-            String plainTextStringNoSeq = plainTextString.substring(4);
 
+        // check integrity
+
+        // Remove the sequence number from the start
+        String plainTextStringNoSeq = plainTextString.substring(4);
+        boolean isVerified = false;
+        if (integrityModeHash) {
             int messageLength = plainTextStringNoSeq.length() - (digest.getDigestLength() * 2); // Remove hash length
 
             // Extract the message and hash parts
@@ -152,18 +167,39 @@ public class DSTP {
             String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
             // System.out.println("calculated hash: " + hashString);
 
-            boolean isVerified = receivedHashString.equals(hashString);
-            if (isVerified) {
-                System.out.println("Is integrity verified: \033[1;32m" + isVerified + "\033[0m"); // Green
-            } else {
-                System.out.println("Is integrity verified: \033[1;31m" + isVerified + "\033[0m"); // Red
-            }
+            isVerified = receivedHashString.equals(hashString);
             plainTextString = plainTextString.substring(0, messageLength + 4); // remove hash
             // from end of the message
         } else {
-            // hmac
-        }
+            // hMac
+            // Verify by comparing the recalculated hMac with the received hMac
+            int messageLength = plainTextStringNoSeq.length() - (hMac.getMacLength() * 2); // Remove hMac length
 
+            // Extract the message and hmac parts
+            String message = plainTextStringNoSeq.substring(0, messageLength);
+            String receivedhMacString = plainTextStringNoSeq.substring(messageLength);
+            System.out.println("message: " + "'" + message + "'");
+            System.out.println("received hmac: " + receivedhMacString);
+
+            // Verify by comparing the recalculated hmac with the received hmac
+            hMac.init(hMacKey);
+            hMac.update(message.getBytes());
+            byte[] hMacByte = hMac.doFinal();
+            String hMacString = ToHex.toHex(hMacByte, hMac.getMacLength()).toString();
+            System.out.println("calculated hmac: " + hMacString);
+
+            isVerified = receivedhMacString.equals(hMacString);
+
+            plainTextString = plainTextString.substring(0, messageLength + 4); // remove hmac
+        }
+        if (isVerified) {
+            System.out.println(
+                    "Integrity verified with " + (integrityModeHash ? "hash" : "hmac") + ": \033[1;32m" + isVerified
+                            + "\033[0m"); // Green
+        } else {
+            System.out.println("Integrity verified with " + (integrityModeHash ? "hash" : "hmac") + ": \033[1;31m"
+                    + isVerified + "\033[0m"); // Red
+        }
         System.out.println("plain : " + plainTextString + " bytes: " + plainText.length);
         return plainTextString;
 
