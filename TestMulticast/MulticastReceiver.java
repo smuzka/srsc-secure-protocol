@@ -1,7 +1,8 @@
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import DSTP.*;
+import java.net.InetAddress;
+
+import DSTP.DSTP;
+import DSTP.EncryptedDatagramPacket;
+import DSTP.EncryptedMulticastSocket;
 
 public class MulticastReceiver {
 
@@ -21,11 +22,11 @@ public class MulticastReceiver {
             System.exit(0);
         }
 
-        MulticastSocket rs = new MulticastSocket(port);
+        EncryptedMulticastSocket rs = new EncryptedMulticastSocket(port);
 
         rs.joinGroup(group);
 
-        DatagramPacket p = new DatagramPacket(new byte[65536], 65536);
+        EncryptedDatagramPacket p = new EncryptedDatagramPacket(new byte[65536], 65536);
         String recvmsg;
 
         do {
@@ -33,10 +34,6 @@ public class MulticastReceiver {
             p.setLength(65536); // resize with max size
             rs.receive(p);
             recvmsg = new String(p.getData(), 0, p.getLength());
-
-            // we can decrypt it here for now
-            System.out.println(DSTP.decryptString(recvmsg));
-            recvmsg = DSTP.decryptString(recvmsg);
 
             System.out.println("Msg recebida: " + recvmsg);
         } while (!recvmsg.equals("fim!"));

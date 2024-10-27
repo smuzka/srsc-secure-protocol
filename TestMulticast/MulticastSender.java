@@ -1,7 +1,9 @@
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import DSTP.*;
+import java.net.InetAddress;
+import java.util.Date;
+
+import DSTP.DSTP;
+import DSTP.EncryptedDatagramPacket;
+import DSTP.EncryptedMulticastSocket;
 
 public class MulticastSender {
 
@@ -23,18 +25,15 @@ public class MulticastSender {
         }
         DSTP.init();
 
-        MulticastSocket ms = new MulticastSocket();
+        EncryptedMulticastSocket ms = new EncryptedMulticastSocket();
         do {
             String msgsecret = "topcsecret message, sent on: ";
 
             String msgdate = new Date().toString();
             msg = msgsecret + msgdate;
-            // we can encrypt it here for now
-            msg = DSTP.encryptString(msg);
+            ms.send(new EncryptedDatagramPacket(msg, group, port));
 
-            ms.send(new DatagramPacket(msg.getBytes(), msg.getBytes().length, group, port));
-
-            --more; // Tirar o comentario se quizer mandar apenas "more" numero de vezes
+//            --more; // Tirar o comentario se quizer mandar apenas "more" numero de vezes
 
             try {
                 Thread.sleep(1000 * timeinterval);
@@ -43,8 +42,7 @@ public class MulticastSender {
 
         } while (more > 0);
         msg = "fim!";
-        msg = DSTP.encryptString(msg);
-        ms.send(new DatagramPacket(msg.getBytes(), msg.getBytes().length, group, port));
+        ms.send(new EncryptedDatagramPacket(msg, group, port));
         ms.close();
 
     }
