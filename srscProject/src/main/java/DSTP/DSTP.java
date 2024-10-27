@@ -17,6 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 import DSTP.utils.RandomBytesGenerator;
 import DSTP.utils.ReadFile;
 import DSTP.utils.ToHex;
+import DSTP.utils.DSTPHeader;
 
 public class DSTP {
     static Cipher cipher;
@@ -67,18 +68,13 @@ public class DSTP {
         ctLength += cipher.update(inputBytes, 0, inputBytes.length, cipherText, ctLength);
         ctLength += cipher.doFinal(cipherText, ctLength);
 
-        // Prepare DSTP header
-        byte[] header = new byte[5];
-        byte[] version = { 0, 1 };
-        byte[] release = { 1 };
-        byte[] payloadLength = { (byte) (ctLength >> 8), (byte) ctLength };
-        System.arraycopy(version, 0, header, 0, version.length);
-        System.arraycopy(release, 0, header, 0, release.length);
-        System.arraycopy(payloadLength, 0, header, 0, payloadLength.length);
+        // Create header
+        DSTPHeader header = new DSTPHeader((short) 2355, (byte) 1, (short) ctLength);
+        System.out.println("header: " + header.encode() + " bytes: " + 5);
+        System.out.println("header decc: " + header.toString() + " bytes: " + ctLength);
 
-        System.out.println("header: " + ToHex.toHex(header, 5) + " bytes: " + 5);
         System.out.println("ciphera: " + ToHex.toHex(cipherText, ctLength) + " bytes: " + ctLength);
-        return ToHex.toHex(cipherText, ctLength).toString();
+        return header.encode() + ToHex.toHex(cipherText, ctLength).toString();
     }
 
     public static String decryptString(String cipherTextHex)
@@ -87,9 +83,13 @@ public class DSTP {
             InvalidKeyException, ShortBufferException, IllegalBlockSizeException,
             BadPaddingException {
 
-        // Convert hex string to byte array
-        byte[] cipherText = ToHex.fromHex(cipherTextHex);
+        // Decode the header
+        DSTPHeader header = DSTPHeader.fromEncodedHeader(cipherTextHex.substring(0,
+                10));
+        System.out.println("decoded header: " + header.toString());
 
+        // Convert hex string to byte array
+        byte[] cipherText = ToHex.fromHex(cipherTextHex.substring(10, cipherTextHex.length()));
         // decryption
         cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
         byte[] buf = new byte[cipher.getOutputSize(cipherText.length)];
