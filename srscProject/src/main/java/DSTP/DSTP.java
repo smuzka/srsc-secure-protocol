@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.MessageDigest;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -24,6 +25,8 @@ public class DSTP {
     static SecretKeySpec key;
     static IvParameterSpec ivSpec;
     static byte[] ivBytes;
+    static MessageDigest digest;
+    static boolean integrityModeHash; // true for hash, false for mac
 
     public static void init()
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
@@ -53,16 +56,49 @@ public class DSTP {
 
         cipher = Cipher.getInstance(confidentiality);
 
+        // Select Hash or MAC mode
+        String configIntegrityMode = variables.get("INTEGRITY");
+        if (configIntegrityMode.equals("H")) {
+            // Select the hash algorithm
+            integrityModeHash = true;
+            String configHAlg = variables.get("H");
+            digest = MessageDigest.getInstance(configHAlg);
+            System.out.println("MAC mode selected");
+        } else if (configIntegrityMode.equals("HMAC")) {
+            integrityModeHash = false;
+
+            System.out.println("HMAC mode selected");
+
+            // String configMACAlg = variables.get("MAC");
+            // String configMACKey = variables.get("MACKEY");
+            // String configMACKeySize = variables.get("MACKEY_SIZE");
+            // digest = MessageDigest.getInstance(configHAlg);
+        } else {
+            System.out.println("Integrity mode not defined");
+            System.exit(0);
+        }
+
     }
 
     public static String encryptString(String plainText)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+        String inputWithH = plainText;
+        // calculate hash or hmac
+        if (integrityModeHash) {
+            // hash
+            byte[] hashByte = digest.digest(plainText.substring(4).getBytes());
+            String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
+            System.out.println("hashString: " + hashString);
+            inputWithH = plainText + hashString;
 
+        } else {
+            // hmac
+        }
         // encryption
         cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-        byte[] inputBytes = plainText.getBytes(StandardCharsets.UTF_8);
-        System.out.println("Input: " + plainText);
+        byte[] inputBytes = inputWithH.getBytes();
+        System.out.println("Input: " + "'" + plainText + "'");
         byte[] cipherText = new byte[cipher.getOutputSize(ivBytes.length + inputBytes.length)];
         int ctLength = cipher.update(ivBytes, 0, ivBytes.length, cipherText, 0);
         ctLength += cipher.update(inputBytes, 0, inputBytes.length, cipherText, ctLength);
@@ -97,8 +133,40 @@ public class DSTP {
         // remove the iv from the start of the message
         byte[] plainText = new byte[bufLength - ivBytes.length];
         System.arraycopy(buf, ivBytes.length, plainText, 0, plainText.length);
-        System.out.println("plain : " + new String(plainText, StandardCharsets.UTF_8) + " bytes: " + plainText.length);
-        return new String(plainText, StandardCharsets.UTF_8);
+        String plainTextString = new String(plainText, StandardCharsets.UTF_8);
+        // check integrity
+        if (integrityModeHash) {
+            // Remove the sequence number from the start
+            String plainTextStringNoSeq = plainTextString.substring(4);
+
+            int messageLength = plainTextStringNoSeq.length() - (digest.getDigestLength() * 2); // Remove hash length
+
+            // Extract the message and hash parts
+            String message = plainTextStringNoSeq.substring(0, messageLength);
+            String receivedHashString = plainTextStringNoSeq.substring(messageLength);
+            // System.out.println("message: " + "'" + message + "'");
+            // System.out.println("received hash: " + receivedHashString);
+
+            // Verify by comparing the recalculated hash with the received hash
+            byte[] hashByte = digest.digest(message.getBytes());
+            String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
+            // System.out.println("calculated hash: " + hashString);
+
+            boolean isVerified = receivedHashString.equals(hashString);
+            if (isVerified) {
+                System.out.println("Is integrity verified: \033[1;32m" + isVerified + "\033[0m"); // Green
+            } else {
+                System.out.println("Is integrity verified: \033[1;31m" + isVerified + "\033[0m"); // Red
+            }
+            plainTextString = plainTextString.substring(0, messageLength + 4); // remove hash
+            // from end of the message
+        } else {
+            // hmac
+        }
+
+        System.out.println("plain : " + plainTextString + " bytes: " + plainText.length);
+        return plainTextString;
+
     }
 
     public static void printMessage()
