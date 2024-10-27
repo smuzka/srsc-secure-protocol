@@ -8,6 +8,9 @@
 import java.io.*;
 import java.net.*;
 
+import DSTP.EncryptedDatagramPacket;
+import DSTP.EncryptedDatagramSocket;
+
 class hjStreamServer {
 
 	static public void main( String []args ) throws Exception {
@@ -25,12 +28,13 @@ class hjStreamServer {
 		int size;
 		int count = 0;
  		long time;
+		System.out.println(args[0]);
 		DataInputStream g = new DataInputStream( new FileInputStream(args[0]) );
 		byte[] buff = new byte[65000];
-		DatagramSocket s = new DatagramSocket();
+		EncryptedDatagramSocket s = new EncryptedDatagramSocket();
 		InetSocketAddress addr =
 		    new InetSocketAddress(args[1],Integer.parseInt(args[2]));
-		DatagramPacket p=new DatagramPacket(buff,buff.length,addr);
+		EncryptedDatagramPacket p=new EncryptedDatagramPacket(buff,buff.length,addr);
 		long t0 = System.nanoTime(); // tempo de referencia
 		long q0 = 0;
 

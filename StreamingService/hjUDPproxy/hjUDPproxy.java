@@ -14,6 +14,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import DSTP.EncryptedDatagramPacket;
+import DSTP.EncryptedDatagramSocket;
+
 class hjUDPproxy {
     public static void main(String[] args) throws Exception {
 if (args.length != 2)
@@ -40,7 +43,7 @@ if (args.length != 2)
         // If listen a remote unicast server try the remote config
         // uncomment the following line
 	
-	 DatagramSocket inSocket = new DatagramSocket(inSocketAddress); 
+	 EncryptedDatagramSocket inSocket = new EncryptedDatagramSocket(inSocketAddress);
 
 	// If listen a remote multicast server using IP Multicasting
         // addressing (remember IP Multicast Range) and port 
@@ -50,11 +53,11 @@ if (args.length != 2)
 	//        ms.joinGroup(InetAddress.getByName("239.9.9.9"));
 
 	int countframes=0;
-        DatagramSocket outSocket = new DatagramSocket();
+        EncryptedDatagramSocket outSocket = new EncryptedDatagramSocket();
         byte[] buffer = new byte[4 * 1024];
         while (true) {
 
-            DatagramPacket inPacket = new DatagramPacket(buffer, buffer.length);
+            EncryptedDatagramPacket inPacket = new EncryptedDatagramPacket(buffer, buffer.length);
 	    // If listen a remote unicast server
 	    // uncomment the following line
 
@@ -71,7 +74,7 @@ if (args.length != 2)
             //System.out.print(":");           // debug
             for (SocketAddress outSocketAddress : outSocketAddressSet) 
 		{
-                outSocket.send(new DatagramPacket(buffer, inPacket.getLength(), outSocketAddress));
+                outSocket.send(new EncryptedDatagramPacket(buffer, inPacket.getLength(), outSocketAddress));
             }
         }
     }

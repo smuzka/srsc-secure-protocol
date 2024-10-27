@@ -25,3 +25,16 @@ java -cp target/classes srscProject.src.main.java.main
   ```
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastSender.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastSender 224.0.0.5 8181 2
   ```
+
+## TFTP-master
+
+* compile and run TFTPServer
+  ```
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TFTP-master/TFTPServer/src/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TFTP-master/TFTPServer/src TFTPServer
+  ```
+
+
+* compile and run TFTPClient
+  ```
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TFTP-master/TFTPClient/src/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TFTP-master/TFTPClient/src TFTPClient 127.0.0.1 R server1.jpg
+  ```
