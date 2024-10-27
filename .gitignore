@@ -1,6 +1,6 @@
-/src/main/java/main.class
-/src/main/java/ReadFile.class
-/src/main/resources/cryptoconfig.txt
-/src/main/java/Utils/RandomBytesGenerator.class
-/src/main/java/Utils/ToHex.class
+srscProject/src/main/java/main.class
+srscProject/src/main/java/ReadFile.class
+srscProject/src/main/resources/cryptoconfig.txt
+srscProject/src/main/java/Utils/RandomBytesGenerator.class
+srscProject/src/main/java/Utils/ToHex.class
 *.class

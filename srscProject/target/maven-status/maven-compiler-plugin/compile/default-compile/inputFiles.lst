@@ -1,7 +1,7 @@
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/DSTP.java
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/EncryptedDatagramPacket.java
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/EncryptedMulticastSocket.java
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/utils/DSTPHeader.java
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/utils/RandomBytesGenerator.java
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/utils/ReadFile.java
-/Users/jakubsmuga/dev/erasmus/srsc/project/srsc-secure-protocol/srscProject/src/main/java/DSTP/utils/ToHex.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/DSTP.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/EncryptedDatagramPacket.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/EncryptedMulticastSocket.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/utils/DSTPHeader.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/utils/RandomBytesGenerator.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/utils/ReadFile.java
+/Users/stas/Programowanie/Put/Semestr5/SRSC/PA1/srscProject/srscProject/src/main/java/DSTP/utils/ToHex.java

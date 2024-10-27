@@ -23,8 +23,8 @@ public class MulticastSender {
             System.err.println("Multicast address required...");
             System.exit(0);
         }
-        DSTP.init();
 
+        DSTP.init();
         EncryptedMulticastSocket ms = new EncryptedMulticastSocket();
         do {
             String msgsecret = "topcsecret message, sent on: ";
@@ -33,7 +33,7 @@ public class MulticastSender {
             msg = msgsecret + msgdate;
             ms.send(new EncryptedDatagramPacket(msg, group, port));
 
-//            --more; // Tirar o comentario se quizer mandar apenas "more" numero de vezes
+            // --more; // Tirar o comentario se quizer mandar apenas "more" numero de vezes
 
             try {
                 Thread.sleep(1000 * timeinterval);

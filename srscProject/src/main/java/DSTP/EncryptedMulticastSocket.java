@@ -15,6 +15,8 @@ import javax.crypto.ShortBufferException;
 public class EncryptedMulticastSocket {
 
     private MulticastSocket socket;
+    private short sequenceNumberSend = 0;
+    private short sequenceNumberReceive = 0;
 
     public EncryptedMulticastSocket(int port) {
         try {
@@ -36,13 +38,28 @@ public class EncryptedMulticastSocket {
         socket.joinGroup(group);
     }
 
-    public void send(EncryptedDatagramPacket packet) throws IOException {
+    public void send(EncryptedDatagramPacket packet)
+            throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
+            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        // Add sequence number to the packet
+        packet.setSequenceNumber(sequenceNumberSend);
         socket.send(packet.getPacket());
+        sequenceNumberSend++;
     }
 
-    public void receive(EncryptedDatagramPacket packet) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public void receive(EncryptedDatagramPacket packet)
+            throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
+            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         socket.receive(packet.getPacket());
-        packet.decryptData();
+        short packetSequenceNumber = packet.decryptData();
+        if (packetSequenceNumber != sequenceNumberReceive) {
+            System.out.println("\033[1;31m Sequence number does not match, packet(s) lost! my seq num: "
+                    + sequenceNumberReceive + " vs packet seq num: " + packetSequenceNumber + "\033[0m");
+            sequenceNumberReceive = packetSequenceNumber;
+        }
+        System.out.println("Received packet with sequence number: " + packetSequenceNumber + ", my sequence number: "
+                + sequenceNumberReceive);
+        sequenceNumberReceive++;
     }
 
     public void close() {

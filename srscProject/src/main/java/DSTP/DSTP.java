@@ -69,7 +69,7 @@ public class DSTP {
         ctLength += cipher.doFinal(cipherText, ctLength);
 
         // Create header
-        DSTPHeader header = new DSTPHeader((short) 2355, (byte) 1, (short) ctLength);
+        DSTPHeader header = new DSTPHeader((short) 2, (byte) 1, (short) ctLength);
         System.out.println("header: " + header.encode() + " bytes: " + 5);
         System.out.println("header decc: " + header.toString() + " bytes: " + ctLength);
 
@@ -84,8 +84,7 @@ public class DSTP {
             BadPaddingException {
 
         // Decode the header
-        DSTPHeader header = DSTPHeader.fromEncodedHeader(cipherTextHex.substring(0,
-                10));
+        DSTPHeader header = DSTPHeader.fromEncodedHeader(cipherTextHex.substring(0, 10));
         System.out.println("decoded header: " + header.toString());
 
         // Convert hex string to byte array

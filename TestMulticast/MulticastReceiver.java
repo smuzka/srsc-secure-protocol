@@ -8,7 +8,6 @@ public class MulticastReceiver {
 
     public static void main(String[] args) throws Exception {
 
-        DSTP.init();
         if (args.length != 2) {
             System.err.println("usage: java MulticastReceiver grupo_multicast porto");
             System.exit(0);
@@ -22,6 +21,7 @@ public class MulticastReceiver {
             System.exit(0);
         }
 
+        DSTP.init();
         EncryptedMulticastSocket rs = new EncryptedMulticastSocket(port);
 
         rs.joinGroup(group);
