@@ -47,20 +47,20 @@ if (args.length != 2)
         byte[] buffer = new byte[4 * 1024];
         while (true) {
 
-        EncryptedDatagramPacket inPacket = new EncryptedDatagramPacket(buffer, buffer.length);
-        if(inSocketAddress.getAddress().isMulticastAddress()){
-            inSocket.receive(inPacket);
-            buffer = inPacket.getData();
-        } else {
-            inSocket.receive(inPacket);
-            buffer = inPacket.getData();
-        }
+            EncryptedDatagramPacket inPacket = new EncryptedDatagramPacket(buffer, buffer.length);
+            if(inSocketAddress.getAddress().isMulticastAddress()){
+                inSocket.receive(inPacket);
+                buffer = inPacket.getData();
+            } else {
+                inSocket.receive(inPacket);
+                buffer = inPacket.getData();
+            }
 
 
-        for (SocketAddress outSocketAddress : outSocketAddressSet)
-        {
-            outSocket.send(new DatagramPacket(buffer, buffer.length, outSocketAddress));
-        }
+            for (SocketAddress outSocketAddress : outSocketAddressSet)
+            {
+                outSocket.send(new DatagramPacket(buffer, buffer.length, outSocketAddress));
+            }
     }
 }
 

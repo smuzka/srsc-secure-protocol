@@ -90,7 +90,8 @@ public class EncryptedDatagramPacket {
     }
 
     public void setData(byte[] data, int offset, int length) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.packet.setData(DSTP.encryptString(data.toString()).getBytes(), offset, DSTP.encryptString(data.toString()).getBytes().length);
+        byte[] encryptedData = DSTP.encryptString(new String(data, offset, length)).getBytes();
+        this.packet.setData(encryptedData, offset, encryptedData.length);
     }
 
     public void setSocketAddress(InetSocketAddress address) {
