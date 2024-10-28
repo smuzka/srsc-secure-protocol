@@ -1,21 +1,18 @@
 /* hjUDPproxy, for use in 2024
  */
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.MulticastSocket;
 import java.net.InetSocketAddress;
-import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedDatagramSocket;
+import DSTP.EncryptedMulticastSocket;
+import DSTP.EncryptedSocket;
 
 class hjUDPproxy {
     public static void main(String[] args) throws Exception {
@@ -34,50 +31,38 @@ if (args.length != 2)
 	String destinations=args[1]; //resend mediastream to this destination endpoint	
 	    
 
-        SocketAddress inSocketAddress = parseSocketAddress(remote);
+        InetSocketAddress inSocketAddress = parseSocketAddress(remote);
         Set<SocketAddress> outSocketAddressSet = Arrays.stream(destinations.split(",")).map(s -> parseSocketAddress(s)).collect(Collectors.toSet());
 
-        // Manage this according to your required setup, namely
-	// if you want to use unicast or multicast channels
 
-        // If listen a remote unicast server try the remote config
-        // uncomment the following line
-	
-	 EncryptedDatagramSocket inSocket = new EncryptedDatagramSocket(inSocketAddress);
+        EncryptedSocket inSocket = null;
+        if(inSocketAddress.getAddress().isMulticastAddress()){
+            inSocket = new EncryptedMulticastSocket(inSocketAddress);
+        } else {
+            inSocket = new EncryptedDatagramSocket(inSocketAddress);
+        }
 
-	// If listen a remote multicast server using IP Multicasting
-        // addressing (remember IP Multicast Range) and port 
-	// uncomment the following two lines
-
-	//	MulticastSocket ms = new MulticastSocket(9999);
-	//        ms.joinGroup(InetAddress.getByName("239.9.9.9"));
-
-	int countframes=0;
-        EncryptedDatagramSocket outSocket = new EncryptedDatagramSocket();
+        int countframes=0;
+        DatagramSocket outSocket = new DatagramSocket();
         byte[] buffer = new byte[4 * 1024];
         while (true) {
 
-            EncryptedDatagramPacket inPacket = new EncryptedDatagramPacket(buffer, buffer.length);
-	    // If listen a remote unicast server
-	    // uncomment the following line
+        EncryptedDatagramPacket inPacket = new EncryptedDatagramPacket(buffer, buffer.length);
+        if(inSocketAddress.getAddress().isMulticastAddress()){
+            inSocket.receive(inPacket);
+            buffer = inPacket.getData();
+        } else {
+            inSocket.receive(inPacket);
+            buffer = inPacket.getData();
+        }
 
-	    inSocket.receive(inPacket);  // if remote is unicast
 
-	    // If listen a remote multcast server
-	    // uncomment the following line
-
-            //ms.receive(inPacket);          // if remote is multicast
-
-	    // Just for debug... 
-            //countframes++;
-            //System.out.println(":"+countframes);           // debug	    
-            //System.out.print(":");           // debug
-            for (SocketAddress outSocketAddress : outSocketAddressSet) 
-		{
-                outSocket.send(new EncryptedDatagramPacket(buffer, inPacket.getLength(), outSocketAddress));
-            }
+        for (SocketAddress outSocketAddress : outSocketAddressSet)
+        {
+            outSocket.send(new DatagramPacket(buffer, buffer.length, outSocketAddress));
         }
     }
+}
 
     private static InetSocketAddress parseSocketAddress(String socketAddress) 
     {

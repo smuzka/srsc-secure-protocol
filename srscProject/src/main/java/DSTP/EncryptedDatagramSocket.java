@@ -13,7 +13,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 
-public class EncryptedDatagramSocket {
+public class EncryptedDatagramSocket implements EncryptedSocket {
 
     DatagramSocket socket;
 

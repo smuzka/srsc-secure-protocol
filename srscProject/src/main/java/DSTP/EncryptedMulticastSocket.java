@@ -2,6 +2,7 @@ package DSTP;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -12,7 +13,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 
-public class EncryptedMulticastSocket {
+public class EncryptedMulticastSocket implements EncryptedSocket {
 
     private MulticastSocket socket;
     private short sequenceNumberSend = 0;
@@ -21,6 +22,14 @@ public class EncryptedMulticastSocket {
     public EncryptedMulticastSocket(int port) {
         try {
             socket = new MulticastSocket(port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public EncryptedMulticastSocket(InetSocketAddress address) {
+        try {
+            socket = new MulticastSocket(address);
         } catch (IOException e) {
             e.printStackTrace();
         }
