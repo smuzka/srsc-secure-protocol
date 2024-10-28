@@ -25,7 +25,7 @@ public class EncryptedDatagramPacket {
     public EncryptedDatagramPacket(byte[] buffer, int length)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        // String encryptedData = DSTP.encryptString(buffer.toString());
+        // String encryptedData = DSTP.encryptBytes(buffer.toString());
         // this.packet = new DatagramPacket(encryptedData.getBytes(),
         // encryptedData.getBytes().length);
         this.packet = new DatagramPacket(buffer, length);
@@ -65,7 +65,7 @@ public class EncryptedDatagramPacket {
         byte[] sequenceNumberBytes = { (byte) ((sequenceNumber >> 8) & 0xFF), (byte) (sequenceNumber & 0xFF) };
         byte[] dataFromPacket = getData();
 
-        byte[] encryptedData = DSTP.encryptString(concatArrays(sequenceNumberBytes, dataFromPacket));
+        byte[] encryptedData = DSTP.encryptBytes(concatArrays(sequenceNumberBytes, dataFromPacket));
 
         this.packet = new DatagramPacket(encryptedData, encryptedData.length, getAddress(),
                 getPort());
@@ -74,7 +74,7 @@ public class EncryptedDatagramPacket {
     public short decryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         byte[] encryptedData = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
-        byte[] decryptedData = DSTP.decryptString(encryptedData);
+        byte[] decryptedData = DSTP.decryptBytes(encryptedData);
         this.packet.setData(Arrays.copyOfRange(decryptedData, 4, decryptedData.length));
         byte[] sequenceBytes = Arrays.copyOfRange(decryptedData, 0, 4);
         short sequenceNumber = (short) (((sequenceBytes[0] & 0xFF) << 8) | (sequenceBytes[1] & 0xFF));
