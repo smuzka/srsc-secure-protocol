@@ -75,8 +75,8 @@ public class EncryptedDatagramPacket {
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         byte[] encryptedData = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
         byte[] decryptedData = DSTP.decryptBytes(encryptedData);
-        this.packet.setData(Arrays.copyOfRange(decryptedData, 4, decryptedData.length));
-        byte[] sequenceBytes = Arrays.copyOfRange(decryptedData, 0, 4);
+        this.packet.setData(Arrays.copyOfRange(decryptedData, 2, decryptedData.length));
+        byte[] sequenceBytes = Arrays.copyOfRange(decryptedData, 0, 2);
         short sequenceNumber = (short) (((sequenceBytes[0] & 0xFF) << 8) | (sequenceBytes[1] & 0xFF));
         return sequenceNumber;
     }
