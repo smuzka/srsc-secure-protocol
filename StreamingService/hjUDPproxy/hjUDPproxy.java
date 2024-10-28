@@ -42,17 +42,13 @@ class hjUDPproxy {
 
         int countframes = 0;
         DatagramSocket outSocket = new DatagramSocket();
-        byte[] buffer = new byte[4 * 1024];
+        byte[] buffer = null;
         while (true) {
+            buffer = new byte[4 * 1024];
 
             EncryptedDatagramPacket inPacket = new EncryptedDatagramPacket(buffer, buffer.length);
-            if (inSocketAddress.getAddress().isMulticastAddress()) {
-                inSocket.receive(inPacket);
-                buffer = inPacket.getData();
-            } else {
-                inSocket.receive(inPacket);
-                buffer = inPacket.getData();
-            }
+            inSocket.receive(inPacket);
+            buffer = inPacket.getData();
 
             for (SocketAddress outSocketAddress : outSocketAddressSet) {
                 outSocket.send(new DatagramPacket(buffer, buffer.length, outSocketAddress));

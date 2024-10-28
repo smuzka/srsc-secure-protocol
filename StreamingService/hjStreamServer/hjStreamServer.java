@@ -31,7 +31,7 @@ class hjStreamServer {
  		long time;
 		System.out.println(args[0]);
 		DataInputStream g = new DataInputStream( new FileInputStream(args[0]) );
-//		byte[] buff = new byte[65000];
+		byte[] buff = null;
 		EncryptedDatagramSocket s = new EncryptedDatagramSocket();
 		InetSocketAddress addr =
 		    new InetSocketAddress(args[1],Integer.parseInt(args[2]));
@@ -43,7 +43,7 @@ class hjStreamServer {
 			time = g.readLong();
 			if ( count == 0 ) q0 = time; // tempo de referencia no stream
 			count += 1;
-			byte[] buff = new byte[size];
+			buff = new byte[size];
 			g.readFully(buff, 0, size );
 			EncryptedDatagramPacket p=new EncryptedDatagramPacket(buff,buff.length,addr);
 			p.setData(buff, 0, size );
