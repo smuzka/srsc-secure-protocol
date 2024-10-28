@@ -32,11 +32,11 @@ java -cp target/classes srscProject.src.main.java.main
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjStreamServer/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjStreamServer hjStreamServer StreamingService/hjStreamServer/movies/monsters.dat 127.0.0.1 10000
   ```
 
+
 * compile and run Proxy
   ```
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjUDPproxy/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjUDPproxy hjUDPproxy 127.0.0.1:10000 127.0.0.1:8888
   ```
-
 
 ## TFTP-master
 
@@ -44,6 +44,7 @@ java -cp target/classes srscProject.src.main.java.main
   ```
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TFTP-master/TFTPServer/src/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TFTP-master/TFTPServer/src TFTPServer
   ```
+
 
 * compile and run TFTPClient
   ```

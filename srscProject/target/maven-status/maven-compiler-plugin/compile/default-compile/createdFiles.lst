@@ -1,6 +1,8 @@
+DSTP/EncryptedDatagramSocket.class
 DSTP/DSTP.class
 DSTP/utils/RandomBytesGenerator.class
 DSTP/utils/ToHex.class
+DSTP/EncryptedSocket.class
 DSTP/EncryptedMulticastSocket.class
 DSTP/utils/DSTPHeader.class
 DSTP/utils/ReadFile.class

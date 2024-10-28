@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
@@ -16,14 +17,18 @@ import javax.crypto.ShortBufferException;
 
 import DSTP.utils.ToHex;
 
+import static DSTP.utils.ToHex.concatArrays;
+
 public class EncryptedDatagramPacket {
     private DatagramPacket packet;
 
     public EncryptedDatagramPacket(byte[] buffer, int length)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String encryptedData = DSTP.encryptString(buffer.toString());
-        this.packet = new DatagramPacket(encryptedData.getBytes(), encryptedData.getBytes().length);
+        // String encryptedData = DSTP.encryptBytes(buffer.toString());
+        // this.packet = new DatagramPacket(encryptedData.getBytes(),
+        // encryptedData.getBytes().length);
+        this.packet = new DatagramPacket(buffer, length);
     }
 
     public EncryptedDatagramPacket(byte[] buffer, int length, SocketAddress address) {
@@ -37,8 +42,8 @@ public class EncryptedDatagramPacket {
     public EncryptedDatagramPacket(String data, InetAddress address, int port)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String encryptedData = DSTP.encryptString(data);
-        this.packet = new DatagramPacket(encryptedData.getBytes(), encryptedData.getBytes().length, address, port);
+        this.packet = new DatagramPacket(data.getBytes(StandardCharsets.UTF_8),
+                data.getBytes(StandardCharsets.UTF_8).length, address, port);
     }
 
     public void setLength(int length) {
@@ -58,23 +63,20 @@ public class EncryptedDatagramPacket {
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         byte[] sequenceNumberBytes = { (byte) ((sequenceNumber >> 8) & 0xFF), (byte) (sequenceNumber & 0xFF) };
-        String decryptedData = DSTP.decryptString(new String(getData()));
-        String encryptedData = DSTP.encryptString(ToHex.toHex(sequenceNumberBytes, 2) + decryptedData);
-        this.packet = new DatagramPacket(encryptedData.getBytes(), encryptedData.getBytes().length, getAddress(), getPort());
-    }
+        byte[] dataFromPacket = getData();
 
-    public void encryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
-            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String decryptedData = new String(packet.getData(), 0, packet.getLength());
-        this.packet.setData(DSTP.encryptString(decryptedData).getBytes());
+        byte[] encryptedData = DSTP.encryptBytes(concatArrays(sequenceNumberBytes, dataFromPacket));
+
+        this.packet = new DatagramPacket(encryptedData, encryptedData.length, getAddress(),
+                getPort());
     }
 
     public short decryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String encryptedData = new String(packet.getData(), 0, packet.getLength());
-        String decryptedData = DSTP.decryptString(encryptedData);
-        this.packet.setData(decryptedData.substring(4).getBytes());
-        byte[] sequenceBytes = ToHex.fromHex(decryptedData.substring(0, 4));
+        byte[] encryptedData = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
+        byte[] decryptedData = DSTP.decryptBytes(encryptedData);
+        this.packet.setData(Arrays.copyOfRange(decryptedData, 2, decryptedData.length));
+        byte[] sequenceBytes = Arrays.copyOfRange(decryptedData, 0, 2);
         short sequenceNumber = (short) (((sequenceBytes[0] & 0xFF) << 8) | (sequenceBytes[1] & 0xFF));
         return sequenceNumber;
     }
@@ -91,9 +93,10 @@ public class EncryptedDatagramPacket {
         return this.packet.getPort();
     }
 
-    public void setData(byte[] data, int offset, int length) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        byte[] encryptedData = DSTP.encryptString(new String(data, offset, length)).getBytes();
-        this.packet.setData(encryptedData, offset, encryptedData.length);
+    public void setData(byte[] data, int offset, int length)
+            throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
+            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        this.packet.setData(data, offset, length);
     }
 
     public void setSocketAddress(InetSocketAddress address) {
