@@ -11,8 +11,8 @@ public class DSTPHeader {
         this.payloadLength = payloadLength;
     }
 
-    public static DSTPHeader fromEncodedHeader(String header) {
-        byte[] headerBytes = ToHex.fromHex(header);
+    public static DSTPHeader fromEncodedHeader(byte[] header) {
+        byte[] headerBytes = header;
 
         if (headerBytes.length != 5) {
             throw new IllegalArgumentException("Header is invalid.");
@@ -27,7 +27,7 @@ public class DSTPHeader {
         return new DSTPHeader(version, release, payloadLength);
     }
 
-    public String encode() {
+    public byte[] encode() {
         byte[] header = new byte[5];
         byte[] versionBytes = { (byte) ((version >> 8) & 0xFF), (byte) (version & 0xFF) };
         byte[] releaseBytes = { (byte) release };
@@ -35,7 +35,7 @@ public class DSTPHeader {
         System.arraycopy(versionBytes, 0, header, 0, versionBytes.length);
         System.arraycopy(releaseBytes, 0, header, 2, releaseBytes.length);
         System.arraycopy(payloadLengthBytes, 0, header, 3, payloadLengthBytes.length);
-        return ToHex.toHex(header, 5).toString();
+        return header;
     }
 
     public short getVersion() {

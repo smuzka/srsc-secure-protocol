@@ -8,6 +8,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -15,6 +16,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 
 import DSTP.utils.ToHex;
+
+import static DSTP.utils.ToHex.concatArrays;
 
 public class EncryptedDatagramPacket {
     private DatagramPacket packet;
@@ -39,9 +42,6 @@ public class EncryptedDatagramPacket {
     public EncryptedDatagramPacket(String data, InetAddress address, int port)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        // String encryptedData = DSTP.encryptString(data);
-        // this.packet = new DatagramPacket(encryptedData.getBytes(),
-        // encryptedData.getBytes().length, address, port);
         this.packet = new DatagramPacket(data.getBytes(StandardCharsets.UTF_8),
                 data.getBytes(StandardCharsets.UTF_8).length, address, port);
     }
@@ -63,27 +63,20 @@ public class EncryptedDatagramPacket {
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         byte[] sequenceNumberBytes = { (byte) ((sequenceNumber >> 8) & 0xFF), (byte) (sequenceNumber & 0xFF) };
-        String dataFromPacket = new String(getData(), StandardCharsets.UTF_8);
+        byte[] dataFromPacket = getData();
 
-        String encryptedData = DSTP
-                .encryptString(ToHex.toHex(sequenceNumberBytes, 2).toString()
-                        + dataFromPacket);
-        this.packet = new DatagramPacket(encryptedData.getBytes(), encryptedData.getBytes().length, getAddress(),
+        byte[] encryptedData = DSTP.encryptString(concatArrays(sequenceNumberBytes, dataFromPacket));
+
+        this.packet = new DatagramPacket(encryptedData, encryptedData.length, getAddress(),
                 getPort());
-    }
-
-    public void encryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
-            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String plainData = new String(packet.getData(), 0, packet.getLength());
-        this.packet.setData(DSTP.encryptString(plainData).getBytes());
     }
 
     public short decryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String encryptedData = new String(packet.getData(), 0, packet.getLength());
-        String decryptedData = DSTP.decryptString(encryptedData);
-        this.packet.setData(decryptedData.substring(4).getBytes());
-        byte[] sequenceBytes = ToHex.fromHex(decryptedData.substring(0, 4));
+        byte[] encryptedData = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
+        byte[] decryptedData = DSTP.decryptString(encryptedData);
+        this.packet.setData(Arrays.copyOfRange(decryptedData, 4, decryptedData.length));
+        byte[] sequenceBytes = Arrays.copyOfRange(decryptedData, 0, 4);
         short sequenceNumber = (short) (((sequenceBytes[0] & 0xFF) << 8) | (sequenceBytes[1] & 0xFF));
         return sequenceNumber;
     }
@@ -103,8 +96,7 @@ public class EncryptedDatagramPacket {
     public void setData(byte[] data, int offset, int length)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        byte[] encryptedData = DSTP.encryptString(new String(data, offset, length)).getBytes();
-        this.packet.setData(encryptedData, offset, encryptedData.length);
+        this.packet.setData(data, offset, length);
     }
 
     public void setSocketAddress(InetSocketAddress address) {

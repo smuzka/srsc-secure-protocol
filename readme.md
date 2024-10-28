@@ -20,6 +20,11 @@ java -cp target/classes srscProject.src.main.java.main
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastReceiver.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastReceiver 224.0.0.5 8181
   ```
 
+* compile and run MulticastSender
+  ```
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastSender.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastSender 224.0.0.5 8181 2
+  ```
+
 ## StreamingService
 
 * compile and run StreamServer
@@ -31,12 +36,6 @@ java -cp target/classes srscProject.src.main.java.main
 * compile and run Proxy
   ```
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjUDPproxy/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjUDPproxy hjUDPproxy 127.0.0.1:10000 127.0.0.1:8888
-  ```
-
-
-* compile and run MulticastSender
-  ```
-  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastSender.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastSender 224.0.0.5 8181 2
   ```
 
 ## TFTP-master
