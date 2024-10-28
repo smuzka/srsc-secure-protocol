@@ -96,23 +96,26 @@ public class DSTP {
     public static byte[] encryptString(byte[] plainText)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
-        System.out.println("plain text: " + new String(plainText, StandardCharsets.UTF_8) + " bytes: " + plainText.length);
+        System.out.println(
+                "plain text: " + new String(plainText, StandardCharsets.UTF_8) + " bytes: " + plainText.length);
         byte[] inputWithH = plainText;
         // calculate hash or hmac
         if (integrityModeHash) {
             // hash
-            byte[] hashByte = digest.digest(Arrays.copyOfRange(plainText, 0, 4));
-            String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
-//            System.out.println("hashString: " + hashString);
+            byte[] hashByte = digest.digest(Arrays.copyOfRange(plainText, 2, plainText.length));
+            // String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
+            // System.out.println("hashString: " + hashString);
             inputWithH = concatArrays(plainText, hashByte);
+            // System.out.println(
+            // "hash: " + ToHex.toHex(hashByte, hashByte.length));
 
         } else {
             // hmac
             hMac.init(hMacKey);
-            hMac.update(Arrays.copyOfRange(plainText, 0, 4));
+            hMac.update(Arrays.copyOfRange(plainText, 2, plainText.length));
             byte[] hMacByte = hMac.doFinal();
-            String hMacString = ToHex.toHex(hMacByte, hMac.getMacLength()).toString();
-//            System.out.println("hMacString: " + hMacString);
+            // String hMacString = ToHex.toHex(hMacByte, hMac.getMacLength()).toString();
+            // System.out.println("hMacString: " + hMacString);
             inputWithH = concatArrays(plainText, hMacByte);
         }
         // encryption
@@ -125,8 +128,9 @@ public class DSTP {
 
         // Create header
         DSTPHeader header = new DSTPHeader((short) 2, (byte) 1, (short) ctLength);
-//        System.out.println("header: " + header.encode() + " bytes: " + 5);
-//        System.out.println("header decc: " + header.toString() + " bytes: " + ctLength);
+        // System.out.println("header: " + header.encode() + " bytes: " + 5);
+        // System.out.println("header decc: " + header.toString() + " bytes: " +
+        // ctLength);
         System.out.println("cipher: " + ToHex.toHex(cipherText, ctLength) + " bytes: " + ctLength);
 
         return concatArrays(header.encode(), cipherText);
@@ -150,33 +154,40 @@ public class DSTP {
         int ptLength = cipher.update(cipherText, 0, cipherText.length, decryptedText, 0);
         ptLength += cipher.doFinal(decryptedText, ptLength);
 
-//        System.out.println("plain : " + new String(decryptedText, StandardCharsets.UTF_8) + " bytes: " + ptLength);
+        // System.out.println("plain : " + new String(decryptedText,
+        // StandardCharsets.UTF_8) + " bytes: " + ptLength);
         // remove the iv from the start of the message
         byte[] plainText = new byte[ptLength - ivBytes.length];
         System.arraycopy(decryptedText, ivBytes.length, plainText, 0, plainText.length);
 
-//        System.out.println("plain : " + new String(plainText, StandardCharsets.UTF_8) + " bytes: " + plainText.length);
+        // System.out.println("plain : " + new String(plainText, StandardCharsets.UTF_8)
+        // + " bytes: " + plainText.length);
 
         // check integrity
         // Remove the sequence number from the start
         byte[] plainTextStringNoSeq = Arrays.copyOfRange(plainText, 2, plainText.length);
         boolean isVerified = false;
         if (integrityModeHash) {
-            int messageLength = plainTextStringNoSeq.length - (digest.getDigestLength()); // Remove hash length
-//            System.out.println("messageLength: " + messageLength);
+            int messageLength = plainTextStringNoSeq.length - digest.getDigestLength(); // Remove hash length
+            // System.out.println("messageLength: " + messageLength);
 
             // Extract the message and hash parts
             byte[] message = Arrays.copyOfRange(plainTextStringNoSeq, 0, messageLength);
-            byte[] receivedHashString = Arrays.copyOfRange(plainTextStringNoSeq, messageLength, plainTextStringNoSeq.length);
-//             System.out.println("message: " + "'" + new String(message, StandardCharsets.UTF_8) + "'");
-            // System.out.println("received hash: " + receivedHashString);
+            byte[] receivedHashString = Arrays.copyOfRange(plainTextStringNoSeq, messageLength,
+                    plainTextStringNoSeq.length);
+
+            // System.out.println("message: " + "'" + new String(message,
+            // StandardCharsets.UTF_8) + "'");
+            // System.out.println("received hash: " + ToHex.toHex(receivedHashString,
+            // receivedHashString.length));
 
             // Verify by comparing the recalculated hash with the received hash
             byte[] hashByte = digest.digest(message);
-            String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
-            // System.out.println("calculated hash: " + hashString);
+            // String hashString = ToHex.toHex(hashByte, hashByte.length).toString();
+            // System.out.println("calculated hash: " + ToHex.toHex(hashByte,
+            // hashByte.length));
 
-            isVerified = Arrays.equals(receivedHashString, hashByte);
+            isVerified = MessageDigest.isEqual(receivedHashString, hashByte);
             plainText = Arrays.copyOfRange(plainText, 0, messageLength + 2); // remove hash
             // from end of the message
         } else {
@@ -186,9 +197,10 @@ public class DSTP {
 
             // Extract the message and hmac parts
             byte[] message = Arrays.copyOfRange(plainTextStringNoSeq, 0, messageLength);
-            byte[] receivedhMacString = Arrays.copyOfRange(plainTextStringNoSeq, messageLength, plainTextStringNoSeq.length);
-//            System.out.println("message: " + "'" + message + "'");
-//            System.out.println("received hmac: " + receivedhMacString);
+            byte[] receivedhMacString = Arrays.copyOfRange(plainTextStringNoSeq, messageLength,
+                    plainTextStringNoSeq.length);
+            // System.out.println("message: " + "'" + message + "'");
+            // System.out.println("received hmac: " + receivedhMacString);
 
             // Verify by comparing the recalculated hmac with the received hmac
             hMac.init(hMacKey);
@@ -197,7 +209,7 @@ public class DSTP {
             String hMacString = ToHex.toHex(hMacByte, hMac.getMacLength()).toString();
             System.out.println("calculated hmac: " + hMacString);
 
-            isVerified = Arrays.equals(receivedhMacString, hMacByte);
+            isVerified = MessageDigest.isEqual(receivedhMacString, hMacByte);
 
             plainText = Arrays.copyOfRange(plainText, 0, messageLength + 2); // remove hmac
         }
