@@ -1,8 +1,6 @@
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.net.InetAddress;
+
+import java.net.*;
+import java.io.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -32,8 +30,8 @@ public class TFTPpacket {
 
   // TFTP constants
   public static int tftpPort = 69;
-  public static int maxTftpPakLen=514;
-  public static int maxTftpData=510;
+  public static int maxTftpPakLen=516;
+  public static int maxTftpData=512;
 
   // Tftp opcodes
   protected static final short tftpRRQ=1;
@@ -63,8 +61,8 @@ public class TFTPpacket {
 
   // Constructor 
   public TFTPpacket() {
-    message=new byte[maxTftpPakLen]; 
-    length=maxTftpPakLen; 
+    message=new byte[65536];
+    length=65536;
   } 
 
   // Methods to receive packet and convert it to yhe right type(data/ack/read/...)
@@ -103,7 +101,7 @@ public class TFTPpacket {
   
   //Method to send packet
   public void send(InetAddress ip, int port, EncryptedDatagramSocket s) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-    s.send(new EncryptedDatagramPacket(new String(message), ip, port));
+    s.send(new EncryptedDatagramPacket(message,length,ip,port));
   }
 
   // DatagramPacket like methods

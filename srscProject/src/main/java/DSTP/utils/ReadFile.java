@@ -8,7 +8,8 @@ import java.util.Map;
 
 public class ReadFile {
     public static Map<String, String> getVariables(String[] args) {
-        // Path to the file
+        // Path to the file, change for correct path while saving files
+//        String filePath = "../../../srscProject/src/main/resources/cryptoconfig.txt";
         String filePath = "srscProject/src/main/resources/cryptoconfig.txt";
 
         // HashMap to store the variables and their values

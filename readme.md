@@ -39,14 +39,15 @@ java -cp target/classes srscProject.src.main.java.main
   ```
 
 ## TFTP-master
+  
+Change path in file srscProject/src/main/java/DSTP/utils/ReadFile.java, to run commands from correct folder and be able to save files
 
-* compile and run TFTPServer
+* Run from /TFTP-master/TFTPServer/src
   ```
-  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TFTP-master/TFTPServer/src/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TFTP-master/TFTPServer/src TFTPServer
+  javac -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar ./*.java && java -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./ TFTPServer  
   ```
-
-
-* compile and run TFTPClient
+  
+* Run from /TFTP-master/TFTPClient/src
   ```
-  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TFTP-master/TFTPClient/src/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TFTP-master/TFTPClient/src TFTPClient 127.0.0.1 R server1.jpg
+  javac -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar ./*.java && java -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./ TFTPClient 127.0.0.1 R server1.jpg
   ```

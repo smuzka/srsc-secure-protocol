@@ -15,7 +15,7 @@ import DSTP.EncryptedDatagramSocket;
 
 public class TFTPServer {
 
-	public static void main(String argv[]) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+	public static void main(String argv[]) {
 		try {
 			//use port 6973
 			EncryptedDatagramSocket sock = new EncryptedDatagramSocket(6973);
@@ -40,6 +40,8 @@ public class TFTPServer {
 		} catch (TftpException e) {
 			System.out.println("Server terminated(TftpException)" + e.getMessage());
 		} catch (IOException e) {
+			System.out.println("Server terminated(IOException)" + e.getMessage());
+		} catch (Exception e) {
 			System.out.println("Server terminated(IOException)" + e.getMessage());
 		}
 	}

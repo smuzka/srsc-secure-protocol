@@ -20,7 +20,7 @@ class TFTPclientRRQ {
 	protected String fileName;
 	protected String dataMode;
 
-	public TFTPclientRRQ(InetAddress ip, String name, String mode) throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+	public TFTPclientRRQ(InetAddress ip, String name, String mode) {
 		server = ip;
 		fileName = name;
 		dataMode = mode;
@@ -115,7 +115,9 @@ class TFTPclientRRQ {
 			System.out.println("IO error, transfer aborted");
 			File wrongFile = new File(fileName);
 			wrongFile.delete();
-		} catch (TftpException e) {
+		} catch (TftpException | InvalidAlgorithmParameterException | NoSuchPaddingException |
+                 ShortBufferException | IllegalBlockSizeException | NoSuchAlgorithmException |
+                 BadPaddingException | InvalidKeyException e) {
 			System.out.println(e.getMessage());
 			File wrongFile = new File(fileName);
 			wrongFile.delete();

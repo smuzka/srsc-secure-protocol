@@ -68,6 +68,12 @@ public class TFTPpacket {
   // Methods to receive packet and convert it to yhe right type(data/ack/read/...)
   public static TFTPpacket receive(EncryptedDatagramSocket sock) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
     TFTPpacket in=new TFTPpacket(), retPak=new TFTPpacket();
+
+      in.message = new byte[65536];
+      in.length = 65536;
+      retPak.message = new byte[65536];
+      retPak.length = 65536;
+
     //receive data and put them into in.message
     EncryptedDatagramPacket inPak = new EncryptedDatagramPacket(in.message,in.length);
     sock.receive(inPak);
@@ -101,7 +107,7 @@ public class TFTPpacket {
   
   //Method to send packet
   public void send(InetAddress ip, int port, EncryptedDatagramSocket s) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-      s.send(new EncryptedDatagramPacket(new String(message),ip,port));
+    s.send(new EncryptedDatagramPacket(message,length,ip,port));
   }
 
   // DatagramPacket like methods

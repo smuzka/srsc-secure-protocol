@@ -39,6 +39,10 @@ public class EncryptedDatagramPacket {
         this.packet = new DatagramPacket(buffer, length, address);
     }
 
+    public EncryptedDatagramPacket(byte[] buffer, int length, InetAddress address, int port) {
+        this.packet = new DatagramPacket(buffer, length, address, port);
+    }
+
     public EncryptedDatagramPacket(String data, InetAddress address, int port)
             throws InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {

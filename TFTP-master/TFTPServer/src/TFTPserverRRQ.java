@@ -3,7 +3,7 @@ import java.security.MessageDigest;
 import java.io.*;
 import java.util.*;
 
-import DSTP.EncryptedDatagramPacket;
+import DSTP.DSTP;
 import DSTP.EncryptedDatagramSocket;
 
 
