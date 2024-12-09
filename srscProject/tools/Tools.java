@@ -16,6 +16,7 @@ public class Tools {
 
     public static void main(String[] args) {
         generateUsers();
+        generateServerKeys();
     }
 
     public static void generateUsers() {
@@ -31,7 +32,7 @@ public class Tools {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
             try (FileWriter userDatabaseWriter = new FileWriter("userDatabase.txt")) {
-                try (FileWriter eccKeyPairsWriter = new FileWriter("ServerEccKeyPair.sec")) {
+                try (FileWriter eccKeyPairsWriter = new FileWriter("ClientEccKeyPair.sec")) {
                     eccKeyPairsWriter.append("Curve,PrivateKey,PublicKey\n");
                     userDatabaseWriter.append("UserId,H(Password),Salt,KpubClient\n");
 
@@ -66,7 +67,38 @@ public class Tools {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public static void generateServerKeys() {
+        Security.addProvider(new BouncyCastleProvider());
+
+        try {
+//          For generating key pair
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("ECDSA", "BC");
+            ECGenParameterSpec ecSpec = new ECGenParameterSpec("secp256k1");
+            kpg.initialize(ecSpec, new SecureRandom());
+
+            try (FileWriter eccKeyPairsWriter = new FileWriter("ServerEccKeyPair.sec")) {
+                eccKeyPairsWriter.append("Curve,PrivateKey,PublicKey\n");
+
+                for (int i = 0; i < 10; i++) {
+                    KeyPair keyPair = kpg.generateKeyPair();
+
+                    eccKeyPairsWriter.append("secp256k1,");
+
+                    String privateKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+                    String publicKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+
+                    eccKeyPairsWriter.append(privateKeyBase64);
+                    eccKeyPairsWriter.append(",");
+                    eccKeyPairsWriter.append(publicKeyBase64);
+                    eccKeyPairsWriter.append("\n");
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static byte[] createNonce() {
