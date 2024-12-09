@@ -5,3 +5,10 @@ srscProject/src/main/java/Utils/RandomBytesGenerator.class
 srscProject/src/main/java/Utils/ToHex.class
 *.class
 /srscProject/target/
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/srsc-secure-protocol.iml
+/.idea/uiDesigner.xml
+/.idea/vcs.xml
+/out/
