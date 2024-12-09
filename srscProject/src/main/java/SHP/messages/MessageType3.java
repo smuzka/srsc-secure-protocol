@@ -2,7 +2,6 @@ package SHP.messages;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -13,6 +12,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
+import SHP.Serializer;
 import SHP.Util;
 
 public class MessageType3 extends Message {
@@ -49,20 +49,21 @@ public class MessageType3 extends Message {
 
     @Override
     public byte[] toByteArray() {
+        byte[] PBEPayload = createPBEPayload();
 
-        byte[] requestSerialized = Util.serializeString(request);
-        byte[] userIdSerialized = Util.serializeString(userId);
-        byte[] nonce1Serialized = Util.serializeBytes(nonce1);
-        byte[] nonce2Serialized = Util.serializeBytes(nonce2);
-        byte[] udpPortSerialized = Util.serializeInt(udpPort);
+        byte[] payload = Util.mergeArrays(PBEPayload);
 
-        byte[] payload = new byte[requestSerialized.length + userIdSerialized.length + nonce1Serialized.length + nonce2Serialized.length + udpPortSerialized.length];
+        return payload;
+    }
 
-        System.arraycopy(requestSerialized, 0, payload, 0, requestSerialized.length);
-        System.arraycopy(userIdSerialized, 0, payload, requestSerialized.length, userIdSerialized.length);
-        System.arraycopy(nonce1Serialized, 0, payload, requestSerialized.length + userIdSerialized.length, nonce1Serialized.length);
-        System.arraycopy(nonce2Serialized, 0, payload, requestSerialized.length + userIdSerialized.length + nonce1Serialized.length, nonce2Serialized.length);
-        System.arraycopy(udpPortSerialized, 0, payload, requestSerialized.length + userIdSerialized.length + nonce1Serialized.length + nonce2Serialized.length, udpPortSerialized.length);
+    private byte[] createPBEPayload() {
+        byte[] requestSerialized = Serializer.serializeString(request);
+        byte[] userIdSerialized = Serializer.serializeString(userId);
+        byte[] nonce1Serialized = Serializer.serializeBytes(nonce1);
+        byte[] nonce2Serialized = Serializer.serializeBytes(nonce2);
+        byte[] udpPortSerialized = Serializer.serializeInt(udpPort);
+
+        byte[] payload = Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized, udpPortSerialized);
 
         return PBEEncrypt(payload);
     }
@@ -71,26 +72,20 @@ public class MessageType3 extends Message {
     public void fromByteArray(byte[] data) {
         data = PBEDecrypt(data);
 
-        int intSizeInBytes = 4;
+        Serializer<String> requestDeserialized = Serializer.deserializeFirstStringInArray(data);
+        this.request = requestDeserialized.getExtractedBytes();
 
-        byte[] requestDeserialized = Util.deserializeFirstStringInArray(data);
-        this.request = new String(requestDeserialized);
+        Serializer<String> userIdDeserialized = Serializer.deserializeFirstStringInArray(requestDeserialized.getRemainingBytes());
+        this.userId = userIdDeserialized.getExtractedBytes();
 
-        data = Arrays.copyOfRange(data, requestDeserialized.length + intSizeInBytes, data.length);
-        byte[] userIdDeserialized = Util.deserializeFirstStringInArray(data);
-        this.userId = new String(userIdDeserialized);
+        Serializer<byte[]> nonce1Deserialized = Serializer.deserializeFirstBytesInArray(userIdDeserialized.getRemainingBytes());
+        this.nonce1 = nonce1Deserialized.getExtractedBytes();
 
-        data = Arrays.copyOfRange(data, userIdDeserialized.length + intSizeInBytes, data.length);
-        byte[] nonce1Deserialized = Util.deserializeFirstBytesInArray(data);
-        this.nonce1 = nonce1Deserialized;
+        Serializer<byte[]> nonce2Deserialized = Serializer.deserializeFirstBytesInArray(nonce1Deserialized.getRemainingBytes());
+        this.nonce2 = nonce2Deserialized.getExtractedBytes();
 
-        data = Arrays.copyOfRange(data, nonce1Deserialized.length + intSizeInBytes, data.length);
-        byte[] nonce2Deserialized = Util.deserializeFirstBytesInArray(data);
-        this.nonce2 = nonce2Deserialized;
-
-        data = Arrays.copyOfRange(data, nonce2Deserialized.length + intSizeInBytes, data.length);
-        byte[] udpPortDeserialized = Util.deserializeFirstIntInArray(data);
-        this.udpPort = ByteBuffer.wrap(udpPortDeserialized).getInt();
+        Serializer<Integer> udpPortDeserialized = Serializer.deserializeFirstIntInArray(nonce2Deserialized.getRemainingBytes());
+        this.udpPort = udpPortDeserialized.getExtractedBytes();
     }
 
     @Override
@@ -115,12 +110,7 @@ public class MessageType3 extends Message {
         }
 
         byte[] salt = this.salt;
-        int counter = ByteBuffer.wrap(this.counter).getInt();
-
-        System.out.println("============= PBEEncrypt =============");
-        System.out.println("password: " + new String(password));
-        System.out.println("salt: " + Arrays.toString(salt));
-        System.out.println("counter: " + counter);
+        int counter = Util.bytesToInt(this.counter);
 
         try {
             PBEKeySpec pbeSpec = new PBEKeySpec(password);
@@ -143,12 +133,7 @@ public class MessageType3 extends Message {
         }
         char[] password = passwordFromFile.toCharArray();
         byte[] salt = this.salt;
-        int counter = ByteBuffer.wrap(this.counter).getInt();
-
-        System.out.println("============= PBEDecrypt =============");
-        System.out.println("password: " + new String(password));
-        System.out.println("salt: " + Arrays.toString(salt));
-        System.out.println("counter: " + counter);
+        int counter = Util.bytesToInt(this.counter);
 
         try {
             PBEKeySpec pbeSpec = new PBEKeySpec(password);
@@ -163,18 +148,6 @@ public class MessageType3 extends Message {
             throw new RuntimeException(e);
         }
     }
-
-//    public void testPBE(byte[] test) {
-//        System.out.println("============= testPBE =============");
-//        System.out.println("Before: " + Arrays.toString(test));
-//
-//        byte[] encrypted = PBEEncrypt(test);
-//        byte[] decrypted = PBEDecrypt(encrypted);
-//
-//        System.out.println("Middle: " + Arrays.toString(encrypted));
-//        System.out.println("After: " + Arrays.toString(decrypted));
-//        System.out.println("===================================");
-//    }
 
     private String getUserPasswordFromFile(String userId) {
 
