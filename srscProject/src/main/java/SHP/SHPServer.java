@@ -36,9 +36,9 @@ public class SHPServer {
             System.out.println("Received MessageType1: " + messageToReceive);
 
             Message messageToSend = new MessageType2(
-                    util.createNonce(),
-                    util.createNonce(),
-                    util.createNonce()
+                    Util.createNonce(),
+                    Util.createNonce(),
+                    Util.createNonce()
             );
             messageToSend.send(out);
             System.out.println("Sent MessageType2: " + messageToReceive);

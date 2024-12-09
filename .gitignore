@@ -4,3 +4,4 @@ srscProject/src/main/resources/cryptoconfig.txt
 srscProject/src/main/java/Utils/RandomBytesGenerator.class
 srscProject/src/main/java/Utils/ToHex.class
 *.class
+/srscProject/target/
