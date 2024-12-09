@@ -3,15 +3,10 @@ Assignment 1
 
 Project uses java 22
 
-### To compile:
+### To compile package:
 ```
-mvn clean install
+mvn package
 ```
-### To run:
-```
-java -cp target/classes srscProject.src.main.java.main
-```
-
 
 ## TestMulticast
 
