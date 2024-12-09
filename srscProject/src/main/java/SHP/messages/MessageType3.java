@@ -1,23 +1,14 @@
 package SHP.messages;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.security.Key;
-import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.Base64;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
 
 import SHP.Serializer;
 import SHP.Util;
 
+import static SHP.PBEEncryptor.PBEDecrypt;
+import static SHP.PBEEncryptor.PBEEncrypt;
+
 public class MessageType3 extends Message {
-    private final String ALGORITHM = "PBEWITHSHA256AND192BITAES-CBC-BC";
-    private final String PROVIDER = "BC";
 
     private String password;
     private byte[] salt;
@@ -65,12 +56,12 @@ public class MessageType3 extends Message {
 
         byte[] payload = Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized, udpPortSerialized);
 
-        return PBEEncrypt(payload);
+        return PBEEncrypt(payload, password, salt, counter);
     }
 
     @Override
     public void fromByteArray(byte[] data) {
-        data = PBEDecrypt(data);
+        data = PBEDecrypt(data, userId, salt, counter);
 
         Serializer<String> requestDeserialized = Serializer.deserializeFirstStringInArray(data);
         this.request = requestDeserialized.getExtractedBytes();
@@ -96,79 +87,5 @@ public class MessageType3 extends Message {
     @Override
     public String toString() {
         return "MessageType3: " + "request=" + request + ", userId=" + userId + ", nonce1=" + Arrays.toString(nonce1) + ", nonce2=" + Arrays.toString(nonce2) + ", udpPort=" + udpPort;
-    }
-
-    private byte[] PBEEncrypt(byte[] data) {
-        char[] password;
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] passwordSHA256 = digest.digest(this.password.getBytes());
-            password = Base64.getEncoder().encodeToString(passwordSHA256).toCharArray();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        byte[] salt = this.salt;
-        int counter = Util.bytesToInt(this.counter);
-
-        try {
-            PBEKeySpec pbeSpec = new PBEKeySpec(password);
-            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(ALGORITHM, PROVIDER);
-            Key sKey = keyFact.generateSecret(pbeSpec);
-
-            Cipher cEnc = Cipher.getInstance(ALGORITHM, PROVIDER);
-            cEnc.init(Cipher.ENCRYPT_MODE, sKey, new PBEParameterSpec(salt, counter));
-
-            return cEnc.doFinal(data);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private byte[] PBEDecrypt(byte[] data) {
-        String passwordFromFile = getUserPasswordFromFile(this.userId);
-        if (passwordFromFile == null) {
-            throw new RuntimeException("User not found");
-        }
-        char[] password = passwordFromFile.toCharArray();
-        byte[] salt = this.salt;
-        int counter = Util.bytesToInt(this.counter);
-
-        try {
-            PBEKeySpec pbeSpec = new PBEKeySpec(password);
-            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(ALGORITHM, PROVIDER);
-            Key sKey = keyFact.generateSecret(pbeSpec);
-
-            Cipher cDec = Cipher.getInstance(ALGORITHM, PROVIDER);
-            cDec.init(Cipher.DECRYPT_MODE, sKey, new PBEParameterSpec(salt, counter));
-
-            return cDec.doFinal(data);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getUserPasswordFromFile(String userId) {
-
-        String filePath = "srscProject/src/main/resources/userDatabase.txt";
-
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.startsWith("UserId,")) {
-                    continue;
-                }
-
-                String[] columns = line.split(",");
-
-                if (columns[0].equals(userId)) {
-                    return columns[1];
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
