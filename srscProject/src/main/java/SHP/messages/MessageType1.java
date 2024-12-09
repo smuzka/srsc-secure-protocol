@@ -10,6 +10,9 @@ public class MessageType1 extends Message {
     }
 
     public MessageType1(byte[] payload) {
+        if (payload.length > 320) {
+            throw new IllegalArgumentException("User ID is too long.");
+        }
         this.userId = payload;
     }
 
