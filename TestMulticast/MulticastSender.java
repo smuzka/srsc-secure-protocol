@@ -4,6 +4,7 @@ import java.util.Date;
 import DSTP.DSTP;
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedMulticastSocket;
+import SHP.SHPServer;
 
 public class MulticastSender {
 
@@ -23,6 +24,10 @@ public class MulticastSender {
             System.err.println("Multicast address required...");
             System.exit(0);
         }
+
+        SHPServer.initConnection(
+                12345
+        );
 
         DSTP.init();
         EncryptedMulticastSocket ms = new EncryptedMulticastSocket();

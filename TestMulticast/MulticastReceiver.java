@@ -3,6 +3,7 @@ import java.net.InetAddress;
 import DSTP.DSTP;
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedMulticastSocket;
+import SHP.SHPClient;
 
 public class MulticastReceiver {
 
@@ -20,6 +21,12 @@ public class MulticastReceiver {
             System.err.println("Multicast address required...");
             System.exit(0);
         }
+
+        SHPClient.initConnection(
+                "localhost",
+                12345,
+                "myId".getBytes()
+        );
 
         DSTP.init();
         EncryptedMulticastSocket rs = new EncryptedMulticastSocket(port);
