@@ -16,6 +16,10 @@ public class MessageType1 extends Message {
         this.userId = payload;
     }
 
+    public byte[] getUserId() {
+        return userId;
+    }
+
     @Override
     public byte[] toByteArray() {
         return userId;

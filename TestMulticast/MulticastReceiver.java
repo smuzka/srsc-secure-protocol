@@ -25,7 +25,8 @@ public class MulticastReceiver {
         SHPClient.initConnection(
                 "localhost",
                 12345,
-                "myId".getBytes()
+                "user0",
+                "Password!0"
         );
 
         DSTP.init();

@@ -20,10 +20,10 @@ abstract public class Message {
         byte[] data = toByteArray();
         out.writeInt(data.length);
         out.write(data);
-        System.out.println("=============sent message=============");
+        System.out.println("============= sent message =============");
         System.out.println("length: " + data.length);
-        System.out.println("data: " + this.toString());
-        System.out.println("======================================");
+        System.out.println("data: " + this);
+        System.out.println("========================================");
     }
 
     public void receive(DataInputStream in) throws IOException {
@@ -41,10 +41,10 @@ abstract public class Message {
         byte[] data = new byte[length];
         in.readFully(data);
         fromByteArray(data);
-        System.out.println("=============receive message=============");
+        System.out.println("============= receive message =============");
         System.out.println("length: " + length);
-        System.out.println("data: " + this.toString());
+        System.out.println("data: " + this);
         System.out.println("messageType: " + messageType);
-        System.out.println("=========================================");
+        System.out.println("===========================================");
     }
 }

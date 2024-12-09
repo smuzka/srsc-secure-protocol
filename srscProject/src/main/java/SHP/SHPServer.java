@@ -1,18 +1,23 @@
 package SHP;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.Security;
 
-import SHP.messages.Message;
 import SHP.messages.MessageType1;
 import SHP.messages.MessageType2;
+import SHP.messages.MessageType3;
 
 public class SHPServer {
 
     public static void initConnection(int serverPort) {
+        Security.addProvider(new BouncyCastleProvider());
+
         try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
             System.out.println("Server is running...");
 
@@ -31,17 +36,22 @@ public class SHPServer {
         try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
              DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
-            Message messageToReceive = new MessageType1();
-            messageToReceive.receive(in);
-            System.out.println("Received MessageType1: " + messageToReceive);
+            MessageType1 messageType1 = new MessageType1();
+            messageType1.receive(in);
 
-            Message messageToSend = new MessageType2(
+            MessageType2 messageType2 = new MessageType2(
                     Util.createNonce(),
                     Util.createNonce(),
                     Util.createNonce()
             );
-            messageToSend.send(out);
-            System.out.println("Sent MessageType2: " + messageToReceive);
+            messageType2.send(out);
+
+            MessageType3 messageType3 = new MessageType3(
+                    messageType2.getNonce1(),
+                    messageType2.getNonce2(),
+                    new String(messageType1.getUserId())
+            );
+            messageType3.receive(in);
 
 
         } catch (IOException e) {

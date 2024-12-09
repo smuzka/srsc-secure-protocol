@@ -16,6 +16,18 @@ public class MessageType2 extends Message {
         this.nonce3 = nonce3;
     }
 
+    public byte[] getNonce1() {
+        return nonce1;
+    }
+
+    public byte[] getNonce2() {
+        return nonce2;
+    }
+
+    public byte[] getNonce3() {
+        return nonce3;
+    }
+
     @Override
     public byte[] toByteArray() {
         byte[] payload = new byte[nonce1.length + nonce2.length + nonce3.length];
@@ -42,7 +54,7 @@ public class MessageType2 extends Message {
 
     @Override
     public String toString() {
-        return "MessageType2: nonce1=" + nonce1 + ", nonce2=" + nonce2 + ", nonce3=" + nonce3;
+        return "MessageType2: nonce1=" + Arrays.toString(nonce1) + ", nonce2=" + Arrays.toString(nonce2) + ", nonce3=" + Arrays.toString(nonce3);
     }
 }
 
