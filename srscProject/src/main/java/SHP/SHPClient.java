@@ -35,6 +35,7 @@ public class SHPClient {
                     userPassword,
                     messageType2.getNonce1(),
                     messageType2.getNonce2(),
+//                    ToDo
                     "ToDo - change request",
                     userId,
                     messageType2.getNonce3(),

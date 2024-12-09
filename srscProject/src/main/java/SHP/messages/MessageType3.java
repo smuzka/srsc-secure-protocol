@@ -2,11 +2,14 @@ package SHP.messages;
 
 import java.util.Arrays;
 
+import SHP.ECDSADigitalSignature;
 import SHP.Serializer;
 import SHP.Util;
 
 import static SHP.PBEEncryptor.PBEDecrypt;
 import static SHP.PBEEncryptor.PBEEncrypt;
+import static SHP.User.getUserPrivateKeyFromClientFile;
+import static SHP.User.getUserPublicKeyFromClientFile;
 
 public class MessageType3 extends Message {
 
@@ -40,27 +43,39 @@ public class MessageType3 extends Message {
 
     @Override
     public byte[] toByteArray() {
-        byte[] PBEPayload = createPBEPayload();
 
-        byte[] payload = Util.mergeArrays(PBEPayload);
+        byte[] serializedPayload = createSerializedPayload();
 
-        return payload;
+        byte[] PBEPayload = PBEEncrypt(serializedPayload, password, salt, counter);
+        byte[] PBEPayloadSerialized = Serializer.serializeBytes(PBEPayload);
+
+        String userPrivateKey = getUserPrivateKeyFromClientFile(userId);
+        byte[] digitalSignature = ECDSADigitalSignature.sign(serializedPayload, userPrivateKey);
+        byte[] digitalSignatureSerialized = Serializer.serializeBytes(digitalSignature);
+
+        return Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized);
     }
 
-    private byte[] createPBEPayload() {
+    private byte[] createSerializedPayload() {
         byte[] requestSerialized = Serializer.serializeString(request);
         byte[] userIdSerialized = Serializer.serializeString(userId);
         byte[] nonce1Serialized = Serializer.serializeBytes(nonce1);
         byte[] nonce2Serialized = Serializer.serializeBytes(nonce2);
         byte[] udpPortSerialized = Serializer.serializeInt(udpPort);
 
-        byte[] payload = Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized, udpPortSerialized);
-
-        return PBEEncrypt(payload, password, salt, counter);
+        return Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized, udpPortSerialized);
     }
 
     @Override
     public void fromByteArray(byte[] data) {
+        Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(data);
+        decryptAndDeserializeData(dataDeserialized.getExtractedBytes());
+
+        Serializer<byte[]> digitalSignatureDeserialized = Serializer.deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
+        verifySignature(digitalSignatureDeserialized.getExtractedBytes());
+    }
+
+    private void decryptAndDeserializeData (byte[] data) {
         data = PBEDecrypt(data, userId, salt, counter);
 
         Serializer<String> requestDeserialized = Serializer.deserializeFirstStringInArray(data);
@@ -77,6 +92,13 @@ public class MessageType3 extends Message {
 
         Serializer<Integer> udpPortDeserialized = Serializer.deserializeFirstIntInArray(nonce2Deserialized.getRemainingBytes());
         this.udpPort = udpPortDeserialized.getExtractedBytes();
+    }
+
+    private void verifySignature(byte[] digitalSignature) {
+        boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature, createSerializedPayload(), getUserPublicKeyFromClientFile(userId));
+        if (!signatureVerificatied) {
+            throw new RuntimeException("Signature verification failed");
+        }
     }
 
     @Override

@@ -33,12 +33,13 @@ public class Tools {
 
             try (FileWriter userDatabaseWriter = new FileWriter("userDatabase.txt")) {
                 try (FileWriter eccKeyPairsWriter = new FileWriter("ClientEccKeyPair.sec")) {
-                    eccKeyPairsWriter.append("Curve,PrivateKey,PublicKey\n");
+                    eccKeyPairsWriter.append("UserId,Curve,PrivateKey,PublicKey\n");
                     userDatabaseWriter.append("UserId,H(Password),Salt,KpubClient\n");
 
                     for (int i = 0; i < 10; i++) {
                         KeyPair keyPair = kpg.generateKeyPair();
 
+                        eccKeyPairsWriter.append("user").append(String.valueOf(i)).append(",");
                         eccKeyPairsWriter.append("secp256k1,");
 
                         String privateKeyBase64 = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
