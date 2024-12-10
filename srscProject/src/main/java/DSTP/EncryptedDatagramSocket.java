@@ -20,17 +20,17 @@ public class EncryptedDatagramSocket implements EncryptedSocket {
     private short sequenceNumberReceive = 0;
 
     public EncryptedDatagramSocket(int port) throws SocketException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        DSTP.init();
+//        DSTP.init();
         this.socket = new DatagramSocket(port);
     }
 
     public EncryptedDatagramSocket(SocketAddress address) throws SocketException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        DSTP.init();
+//        DSTP.init();
         this.socket = new DatagramSocket(address);
     }
 
     public EncryptedDatagramSocket() throws SocketException, InvalidAlgorithmParameterException, NoSuchPaddingException, ShortBufferException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        DSTP.init();
+//        DSTP.init();
         this.socket = new DatagramSocket();
     }
 

@@ -29,7 +29,6 @@ public class MulticastSender {
                 12345
         );
 
-        DSTP.init();
         EncryptedMulticastSocket ms = new EncryptedMulticastSocket();
         do {
             String msgsecret = "topcsecret message, sent on: ";

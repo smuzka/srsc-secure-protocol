@@ -29,7 +29,6 @@ public class MulticastReceiver {
                 "Password!0"
         );
 
-        DSTP.init();
         EncryptedMulticastSocket rs = new EncryptedMulticastSocket(port);
 
         rs.joinGroup(group);

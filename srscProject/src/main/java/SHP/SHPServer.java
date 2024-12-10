@@ -9,10 +9,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Security;
 
+import DSTP.DSTP;
 import SHP.messages.MessageType1;
 import SHP.messages.MessageType2;
 import SHP.messages.MessageType3;
 import SHP.messages.MessageType4;
+import SHP.messages.MessageType5;
 
 public class SHPServer {
 
@@ -35,7 +37,7 @@ public class SHPServer {
 
     private static void handleClient(Socket clientSocket) {
         try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-                DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
+             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
             MessageType1 messageType1 = new MessageType1();
             messageType1.receive(in);
@@ -59,8 +61,31 @@ public class SHPServer {
                     "ToDo - change confirmation request",
                     "cryptoconfig");
             messageType4.send(out);
+
+//            ToDo: change configData to be read from a file
+            DSTP.init(
+                    "CONFIDENTIALITY: AES/CBC/PKCS5Padding\n" +
+                            "SYMMETRIC_KEY: 2b7e151628aed2a6abf7158809cf4f3c\n" +
+                            "SYMMETRIC_KEY_SIZE: 128\n" +
+                            "IV Size: 16\n" +
+                            "INTEGRITY: H\n" +
+                            "H: SHA-256\n" +
+                            "MAC: HMacSHA3-512\n" +
+                            "MACKEY: 1f1e1d1c1b1a19181716151413121111\n" +
+                            "MACKEY_SIZE: 128"
+            );
+
+            MessageType5 messageType5 = new MessageType5(
+                    new String(messageType1.getUserId()),
+                    messageType4.getNonce5()
+            );
+            messageType5.receive(in);
+
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("Client disconnected.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

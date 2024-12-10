@@ -3,6 +3,7 @@ package DSTP.utils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +41,36 @@ public class ReadFile {
 
         System.out.println("Configuration:");
         // Output the variables and values
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            System.out.println(entry.getKey() + " = " + entry.getValue());
+        }
+
+        return variables;
+    }
+
+    public static Map<String, String> getVariables(String configData) {
+        Map<String, String> variables = new HashMap<>();
+
+        try (BufferedReader br = new BufferedReader(new StringReader(configData))) {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(":");
+
+                if (parts.length == 2) {
+                    String variableName = parts[0].trim();
+                    String value = parts[1].trim();
+
+                    variables.put(variableName, value);
+                } else {
+                    System.out.println("Skipping invalid line: " + line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Configuration:");
         for (Map.Entry<String, String> entry : variables.entrySet()) {
             System.out.println(entry.getKey() + " = " + entry.getValue());
         }

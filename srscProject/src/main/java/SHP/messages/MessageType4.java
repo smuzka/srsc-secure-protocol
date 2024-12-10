@@ -34,6 +34,10 @@ public class MessageType4 extends Message {
         this.requestConfirmation = requestConfirmation;
     }
 
+    public byte[] getNonce5() {
+        return nonce5;
+    }
+
     @Override
     public byte[] toByteArray() {
         byte[] serializedPayload = createSerializedPayload();
