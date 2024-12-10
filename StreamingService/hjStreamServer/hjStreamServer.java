@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedDatagramSocket;
+import SHP.SHPServer;
 
 class hjStreamServer {
 
@@ -25,7 +26,12 @@ class hjStreamServer {
 		 
 	         System.exit(-1);
 	         }
-      
+
+		SHPServer.initConnection(
+				"srscProject/src/main/resources/",
+				12345
+		);
+
 		int size;
 		int count = 0;
  		long time;

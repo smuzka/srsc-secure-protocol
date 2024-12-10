@@ -13,6 +13,7 @@ import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedDatagramSocket;
 import DSTP.EncryptedMulticastSocket;
 import DSTP.EncryptedSocket;
+import SHP.SHPClient;
 
 class hjUDPproxy {
     public static void main(String[] args) throws Exception {
@@ -43,6 +44,15 @@ class hjUDPproxy {
         int countframes = 0;
         DatagramSocket outSocket = new DatagramSocket();
         byte[] buffer = null;
+
+        SHPClient.initConnection(
+                "srscProject/src/main/resources/",
+                "localhost",
+                12345,
+                "user0",
+                "Password!0"
+        );
+
         while (true) {
             buffer = new byte[4 * 1024];
 
