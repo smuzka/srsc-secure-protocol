@@ -83,6 +83,16 @@ public class Util {
         return result;
     }
 
+    public static void verifyNonce(byte[] nonce_previous, byte[] nonce) {
+        try {
+            if (!Arrays.equals(Util.intToBytes(Util.bytesToInt(nonce_previous) + 1), nonce)) {
+                throw new RuntimeException("Nonce verification failed");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String bytesToString(byte[] value) {
         return new String(value);
     }

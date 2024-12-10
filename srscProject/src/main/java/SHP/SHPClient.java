@@ -40,15 +40,15 @@ public class SHPClient {
                     // ToDo
                     "ToDo - change request",
                     userId,
-                    messageType2.getNonce3(),
+                    Util.intToBytes(Util.bytesToInt(messageType2.getNonce3()) + 1),
                     Util.createNonce(),
                     serverPort);
             messageType3.send(out);
 
-            MessageType4 messageType4 = new MessageType4(userPassword, userId);
+            MessageType4 messageType4 = new MessageType4(userPassword, userId, messageType3.getNonce4());
             messageType4.receive(in);
 
-//            ToDo Change configData to be read from previous message
+            // ToDo Change configData to be read from previous message
             DSTP.init(
                     "CONFIDENTIALITY: AES/CBC/PKCS5Padding\n" +
                             "SYMMETRIC_KEY: 2b7e151628aed2a6abf7158809cf4f3c\n" +
@@ -58,13 +58,12 @@ public class SHPClient {
                             "H: SHA-256\n" +
                             "MAC: HMacSHA3-512\n" +
                             "MACKEY: 1f1e1d1c1b1a19181716151413121111\n" +
-                            "MACKEY_SIZE: 128"
-            );
+                            "MACKEY_SIZE: 128");
 
             MessageType5 messageType5 = new MessageType5(
-                    messageType4.getNonce5(),
-                    userPassword
-            );
+                    Util.intToBytes(Util.bytesToInt(messageType4.getNonce5()) + 1),
+                    userPassword);
+
             messageType5.send(out);
 
         } catch (Exception e) {

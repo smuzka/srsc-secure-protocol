@@ -20,10 +20,12 @@ public class MessageType4 extends Message {
     private String requestConfirmation;
     private String cryptoConfig;
     private String password;
+    private byte[] nonce4_previous;
 
-    public MessageType4(String password, String userId) {
+    public MessageType4(String password, String userId, byte[] nonce4_previous) {
         this.password = password;
         this.userId = userId;
+        this.nonce4_previous = nonce4_previous;
     }
 
     public MessageType4(byte[] nonce4, byte[] nonce5, String userId, String requestConfirmation, String cryptoConfig) {
@@ -78,6 +80,10 @@ public class MessageType4 extends Message {
         Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(remainingBytes);
         decryptAndDeserializeData(dataDeserialized.getExtractedBytes());
 
+        // verify nonce4
+        Util.verifyNonce(nonce4_previous, nonce4);
+
+        // Deserialize the digital signature
         Serializer<byte[]> digitalSignatureDeserialized = Serializer
                 .deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
         Util.verifySignature(digitalSignatureDeserialized.getExtractedBytes(),

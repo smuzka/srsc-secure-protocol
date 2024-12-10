@@ -13,20 +13,20 @@ public class MessageType5 extends Message {
     private final static String SYNCHRONIZATION = "GO";
 
     private String userId;
-    private byte[] nonce1;
+    private byte[] nonce5_previous;
+    private byte[] nonce5;
     private String password;
 
-    public MessageType5() {
-    }
-
-    public MessageType5(byte[] nonce1, String password) {
-        this.nonce1 = nonce1;
-        this.password = password;
-    }
-
-    public MessageType5(String userId, byte[] nonce1) {
+    // for server
+    public MessageType5(String userId, byte[] nonce5_previous) {
         this.userId = userId;
-        this.nonce1 = nonce1;
+        this.nonce5_previous = nonce5_previous;
+    }
+
+    // for client
+    public MessageType5(byte[] nonce5, String password) {
+        this.nonce5 = nonce5;
+        this.password = password;
     }
 
     @Override
@@ -58,20 +58,18 @@ public class MessageType5 extends Message {
             throw new RuntimeException("Wrong Synchronization String");
         }
 
-        Serializer<byte[]> nonce1Deserialized = Serializer.deserializeFirstBytesInArray(synchronizationString.getRemainingBytes());
-        if (!Arrays.equals(this.nonce1, nonce1Deserialized.getExtractedBytes())) {
-            throw new RuntimeException("Wrong nonce");
-        }
+        Serializer<byte[]> nonce5Deserialized = Serializer
+                .deserializeFirstBytesInArray(synchronizationString.getRemainingBytes());
+        Util.verifyNonce(nonce5_previous, nonce5Deserialized.getExtractedBytes());
 
         System.out.println("MessageType5 received: " + this);
     }
 
-
     public byte[] createSerializedPayload() {
         byte[] synchronizationStringSerialized = Serializer.serializeString(SYNCHRONIZATION);
-        byte[] nonce1Serialized = Serializer.serializeBytes(nonce1);
+        byte[] nonce5Serialized = Serializer.serializeBytes(nonce5);
 
-        return Util.mergeArrays(synchronizationStringSerialized, nonce1Serialized);
+        return Util.mergeArrays(synchronizationStringSerialized, nonce5Serialized);
     }
 
     public byte[] encryptData(byte[] data) {
@@ -105,6 +103,6 @@ public class MessageType5 extends Message {
 
     @Override
     public String toString() {
-        return "MessageType5: " + Arrays.toString(nonce1);
+        return "MessageType5: " + Arrays.toString(nonce5_previous);
     }
 }

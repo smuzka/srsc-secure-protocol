@@ -25,25 +25,27 @@ public class MessageType3 extends Message {
 
     private String request;
     private String userId;
-    private byte[] nonce1;
-    private byte[] nonce2;
+    private byte[] nonce3_previous;
+    private byte[] nonce3;
+    private byte[] nonce4;
     private int udpPort;
 
-    public MessageType3(byte[] salt, byte[] counter, String userId) {
+    public MessageType3(byte[] salt, byte[] counter, byte[] nonce3_previous, String userId) {
         this.salt = salt;
         this.counter = counter;
+        this.nonce3_previous = nonce3_previous;
         this.userId = userId;
     }
 
-    public MessageType3(String password, byte[] salt, byte[] counter, String request, String userId, byte[] nonce1,
-            byte[] nonce2, int udpPort) {
+    public MessageType3(String password, byte[] salt, byte[] counter, String request, String userId, byte[] nonce3,
+            byte[] nonce4, int udpPort) {
         this.password = password;
         this.salt = salt;
         this.counter = counter;
         this.request = request;
         this.userId = userId;
-        this.nonce1 = nonce1;
-        this.nonce2 = nonce2;
+        this.nonce3 = nonce3;
+        this.nonce4 = nonce4;
         this.udpPort = udpPort;
     }
 
@@ -68,11 +70,11 @@ public class MessageType3 extends Message {
     private byte[] createSerializedPayload() {
         byte[] requestSerialized = Serializer.serializeString(request);
         byte[] userIdSerialized = Serializer.serializeString(userId);
-        byte[] nonce1Serialized = Serializer.serializeBytes(nonce1);
-        byte[] nonce2Serialized = Serializer.serializeBytes(nonce2);
+        byte[] nonce3Serialized = Serializer.serializeBytes(nonce3);
+        byte[] nonce4Serialized = Serializer.serializeBytes(nonce4);
         byte[] udpPortSerialized = Serializer.serializeInt(udpPort);
 
-        return Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized,
+        return Util.mergeArrays(requestSerialized, userIdSerialized, nonce3Serialized, nonce4Serialized,
                 udpPortSerialized);
     }
 
@@ -88,6 +90,10 @@ public class MessageType3 extends Message {
         Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(remainingBytes);
         decryptAndDeserializeData(dataDeserialized.getExtractedBytes());
 
+        // verify nonce3
+        Util.verifyNonce(nonce3_previous, nonce3);
+
+        // Deserialize the digital signature
         Serializer<byte[]> digitalSignatureDeserialized = Serializer
                 .deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
         Util.verifySignature(digitalSignatureDeserialized.getExtractedBytes(),
@@ -105,21 +111,21 @@ public class MessageType3 extends Message {
                 .deserializeFirstStringInArray(requestDeserialized.getRemainingBytes());
         this.userId = userIdDeserialized.getExtractedBytes();
 
-        Serializer<byte[]> nonce1Deserialized = Serializer
+        Serializer<byte[]> nonce3Deserialized = Serializer
                 .deserializeFirstBytesInArray(userIdDeserialized.getRemainingBytes());
-        this.nonce1 = nonce1Deserialized.getExtractedBytes();
+        this.nonce3 = nonce3Deserialized.getExtractedBytes();
 
-        Serializer<byte[]> nonce2Deserialized = Serializer
-                .deserializeFirstBytesInArray(nonce1Deserialized.getRemainingBytes());
-        this.nonce2 = nonce2Deserialized.getExtractedBytes();
+        Serializer<byte[]> nonce4Deserialized = Serializer
+                .deserializeFirstBytesInArray(nonce3Deserialized.getRemainingBytes());
+        this.nonce4 = nonce4Deserialized.getExtractedBytes();
 
         Serializer<Integer> udpPortDeserialized = Serializer
-                .deserializeFirstIntInArray(nonce2Deserialized.getRemainingBytes());
+                .deserializeFirstIntInArray(nonce4Deserialized.getRemainingBytes());
         this.udpPort = udpPortDeserialized.getExtractedBytes();
     }
 
     public byte[] getNonce4() {
-        return nonce2;
+        return nonce4;
     }
 
     @Override
@@ -129,7 +135,7 @@ public class MessageType3 extends Message {
 
     @Override
     public String toString() {
-        return "MessageType3: " + "request=" + request + ", userId=" + userId + ", nonce1=" + Arrays.toString(nonce1)
-                + ", nonce2=" + Arrays.toString(nonce2) + ", udpPort=" + udpPort;
+        return "MessageType3: " + "request=" + request + ", userId=" + userId + ", nonce3=" + Arrays.toString(nonce3)
+                + ", nonce4=" + Arrays.toString(nonce4) + ", udpPort=" + udpPort;
     }
 }

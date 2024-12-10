@@ -42,7 +42,7 @@ public class SHPServer {
 
     private static boolean handleClient(Socket clientSocket) {
         try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
+                DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
             MessageType1 messageType1 = new MessageType1();
             messageType1.receive(in);
@@ -56,6 +56,7 @@ public class SHPServer {
             MessageType3 messageType3 = new MessageType3(
                     messageType2.getNonce1(),
                     messageType2.getNonce2(),
+                    messageType2.getNonce3(),
                     new String(messageType1.getUserId()));
             messageType3.receive(in);
 
@@ -67,7 +68,7 @@ public class SHPServer {
                     "cryptoconfig");
             messageType4.send(out);
 
-//            ToDo: change configData to be read from a file
+            // ToDo: change configData to be read from a file
             DSTP.init(
                     "CONFIDENTIALITY: AES/CBC/PKCS5Padding\n" +
                             "SYMMETRIC_KEY: 2b7e151628aed2a6abf7158809cf4f3c\n" +
@@ -77,13 +78,11 @@ public class SHPServer {
                             "H: SHA-256\n" +
                             "MAC: HMacSHA3-512\n" +
                             "MACKEY: 1f1e1d1c1b1a19181716151413121111\n" +
-                            "MACKEY_SIZE: 128"
-            );
+                            "MACKEY_SIZE: 128");
 
             MessageType5 messageType5 = new MessageType5(
                     new String(messageType1.getUserId()),
-                    messageType4.getNonce5()
-            );
+                    messageType4.getNonce5());
             messageType5.receive(in);
 
             return true;
