@@ -17,13 +17,12 @@ public class SHPClient {
             String serverAddress,
             int serverPort,
             String userId,
-            String userPassword
-    ) {
+            String userPassword) {
         Security.addProvider(new BouncyCastleProvider());
 
         try (Socket socket = new Socket(serverAddress, serverPort);
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-             DataInputStream in = new DataInputStream(socket.getInputStream())) {
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                DataInputStream in = new DataInputStream(socket.getInputStream())) {
 
             MessageType1 messageType1 = new MessageType1(userId.getBytes());
             messageType1.send(out);
@@ -35,13 +34,12 @@ public class SHPClient {
                     userPassword,
                     messageType2.getNonce1(),
                     messageType2.getNonce2(),
-//                    ToDo
+                    // ToDo
                     "ToDo - change request",
                     userId,
                     messageType2.getNonce3(),
                     Util.createNonce(),
-                    serverPort
-            );
+                    serverPort);
             messageType3.send(out);
 
         } catch (Exception e) {

@@ -34,7 +34,7 @@ public class SHPServer {
 
     private static void handleClient(Socket clientSocket) {
         try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
+                DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
             MessageType1 messageType1 = new MessageType1();
             messageType1.receive(in);
@@ -42,17 +42,14 @@ public class SHPServer {
             MessageType2 messageType2 = new MessageType2(
                     Util.createNonce(),
                     Util.createNonce(),
-                    Util.createNonce()
-            );
+                    Util.createNonce());
             messageType2.send(out);
 
             MessageType3 messageType3 = new MessageType3(
                     messageType2.getNonce1(),
                     messageType2.getNonce2(),
-                    new String(messageType1.getUserId())
-            );
+                    new String(messageType1.getUserId()));
             messageType3.receive(in);
-
 
         } catch (IOException e) {
             System.out.println("Client disconnected.");
