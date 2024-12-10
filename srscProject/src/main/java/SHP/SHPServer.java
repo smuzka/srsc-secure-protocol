@@ -12,6 +12,7 @@ import java.security.Security;
 import SHP.messages.MessageType1;
 import SHP.messages.MessageType2;
 import SHP.messages.MessageType3;
+import SHP.messages.MessageType4;
 
 public class SHPServer {
 
@@ -51,6 +52,13 @@ public class SHPServer {
                     new String(messageType1.getUserId()));
             messageType3.receive(in);
 
+            MessageType4 messageType4 = new MessageType4(
+                    messageType3.getNonce4(),
+                    Util.createNonce(), // nonce5
+                    new String(messageType1.getUserId()),
+                    "ToDo - change confirmation request",
+                    "cryptoconfig");
+            messageType4.send(out);
         } catch (IOException e) {
             System.out.println("Client disconnected.");
         }

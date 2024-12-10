@@ -10,6 +10,7 @@ import java.security.Security;
 import SHP.messages.MessageType1;
 import SHP.messages.MessageType2;
 import SHP.messages.MessageType3;
+import SHP.messages.MessageType4;
 
 public class SHPClient {
 
@@ -42,6 +43,8 @@ public class SHPClient {
                     serverPort);
             messageType3.send(out);
 
+            // MessageType4 messageType4 = new MessageType4();
+            // messageType4.receive(in);
         } catch (Exception e) {
             e.printStackTrace();
         }

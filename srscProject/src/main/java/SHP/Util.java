@@ -1,8 +1,11 @@
 package SHP;
 
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
 
 public class Util {
 
@@ -15,6 +18,15 @@ public class Util {
             e.printStackTrace();
         }
         return nonce;
+    }
+
+    public static byte[] hashPassword(String password) {
+        try {
+            byte[] passwordHash = MessageDigest.getInstance("SHA-256").digest(password.getBytes());
+            return Base64.getEncoder().encodeToString(passwordHash).getBytes();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Sha-256 algorithm not found", e);
+        }
     }
 
     public static byte[] mergeArrays(byte[]... arrays) {
@@ -30,19 +42,19 @@ public class Util {
         return result;
     }
 
-    public static String bytesToString (byte[] value) {
+    public static String bytesToString(byte[] value) {
         return new String(value);
     }
 
-    public static byte[] stringToBytes (String value) {
+    public static byte[] stringToBytes(String value) {
         return value.getBytes();
     }
 
-    public static int bytesToInt (byte[] value) {
+    public static int bytesToInt(byte[] value) {
         return ByteBuffer.wrap(value).getInt();
     }
 
-    public static byte[] intToBytes (int value) {
+    public static byte[] intToBytes(int value) {
         return ByteBuffer.allocate(4).putInt(value).array();
     }
 }

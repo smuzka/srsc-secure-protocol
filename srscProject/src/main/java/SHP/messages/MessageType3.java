@@ -3,12 +3,8 @@ package SHP.messages;
 import java.util.Arrays;
 import java.util.Base64;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.InvalidKeyException;
 
 import SHP.ECDSADigitalSignature;
 import SHP.HMAC;
@@ -64,7 +60,7 @@ public class MessageType3 extends Message {
         byte[] digitalSignatureSerialized = Serializer.serializeBytes(digitalSignature);
 
         byte[] X = Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized);
-        byte[] hMac = HMAC.generateHMAC(X, hashPassword(password));
+        byte[] hMac = HMAC.generateHMAC(X, Util.hashPassword(password));
 
         return Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized, hMac);
     }
@@ -120,21 +116,16 @@ public class MessageType3 extends Message {
         this.udpPort = udpPortDeserialized.getExtractedBytes();
     }
 
-    private byte[] hashPassword(String password) {
-        try {
-            byte[] passwordHash = MessageDigest.getInstance("SHA-256").digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(passwordHash).getBytes();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Sha-256 algorithm not found", e);
-        }
-    }
-
     private void verifySignature(byte[] digitalSignature) {
         boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature,
                 createSerializedPayload(), getUserPublicKeyFromClientFile(userId));
         if (!signatureVerificatied) {
             throw new RuntimeException("Signature verification failed");
         }
+    }
+
+    public byte[] getNonce4() {
+        return nonce2;
     }
 
     @Override
