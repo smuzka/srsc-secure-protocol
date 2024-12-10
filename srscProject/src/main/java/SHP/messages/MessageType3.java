@@ -128,6 +128,14 @@ public class MessageType3 extends Message {
         return nonce4;
     }
 
+    public String getRequest() {
+        return request;
+    }
+
+    public int getUdpPort() {
+        return udpPort;
+    }
+
     @Override
     public MessageType getType() {
         return MessageType.TYPE3;

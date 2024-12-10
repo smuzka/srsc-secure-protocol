@@ -20,8 +20,10 @@ public class SHPClient {
             String filesPath,
             String serverAddress,
             int serverPort,
+            int udpPort,
             String userId,
-            String userPassword) {
+            String userPassword,
+            String request) {
         Security.addProvider(new BouncyCastleProvider());
         User.setFilePath(filesPath);
 
@@ -39,12 +41,11 @@ public class SHPClient {
                     userPassword,
                     messageType2.getNonce1(),
                     messageType2.getNonce2(),
-                    // ToDo
-                    "ToDo - change request",
+                    request,
                     userId,
                     Util.intToBytes(Util.bytesToInt(messageType2.getNonce3()) + 1),
                     Util.createNonce(),
-                    serverPort);
+                    udpPort);
             messageType3.send(out);
 
             MessageType4 messageType4 = new MessageType4(userPassword, userId, messageType3.getNonce4());

@@ -25,13 +25,13 @@ If it gets stuck, just run it again.
 
 * compile and run StreamServer
   ```
-  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjStreamServer/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjStreamServer hjStreamServer StreamingService/hjStreamServer/movies/monsters.dat 127.0.0.1 10000
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjStreamServer/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjStreamServer hjStreamServer 
   ```
 
 
 * compile and run Proxy
   ```
-  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjUDPproxy/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjUDPproxy hjUDPproxy 127.0.0.1:10000 127.0.0.1:8888
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjUDPproxy/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjUDPproxy hjUDPproxy user0 Password!0 127.0.0.1 12345 monsters.dat 10000 8888
   ```
 
 ## TFTP-master

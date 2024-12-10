@@ -11,23 +11,14 @@ import java.util.Arrays;
 
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedDatagramSocket;
+import SHP.ConnectionResult;
 import SHP.SHPServer;
 
 class hjStreamServer {
 
 	static public void main( String []args ) throws Exception {
-	        if (args.length != 3)
-	        {
-	         System.out.println("Use: hjStramSrver <movie> <ip-multicast-address> <port>");
-	         System.out.println("Ex: hjStreamSrver  <movie> 224.2.2.2 9000");		 		 
-	         System.out.println(" or: hjStreamSrver  <movie> <ip-unicast-address> <port>");
-	         System.out.println("Ex: hjStreamSrver  <movie> 127.0.0.1 10000");		 		 		 
 
-		 
-	         System.exit(-1);
-	         }
-
-		SHPServer.initConnection(
+		ConnectionResult connectionResult = SHPServer.initConnection(
 				"srscProject/src/main/resources/",
 				12345
 		);
@@ -35,12 +26,11 @@ class hjStreamServer {
 		int size;
 		int count = 0;
  		long time;
-		System.out.println(args[0]);
-		DataInputStream g = new DataInputStream( new FileInputStream(args[0]) );
+        DataInputStream g = new DataInputStream( new FileInputStream("StreamingService/hjStreamServer/movies/" + connectionResult.fileName()) );
 		byte[] buff = null;
 		EncryptedDatagramSocket s = new EncryptedDatagramSocket();
 		InetSocketAddress addr =
-		    new InetSocketAddress(args[1],Integer.parseInt(args[2]));
+		    new InetSocketAddress("127.0.0.1",connectionResult.serverPort());
 		long t0 = System.nanoTime(); // tempo de referencia
 		long q0 = 0;
 

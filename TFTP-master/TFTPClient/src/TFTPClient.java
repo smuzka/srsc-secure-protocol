@@ -46,8 +46,11 @@ public class TFTPClient {
 					"../../../srscProject/src/main/resources/",
 					"localhost",
 					12345,
+					9999,
 					"user0",
-					"Password!0"
+					"Password!0",
+//					ToDo change
+					"test"
 			);
 
 			//process read request

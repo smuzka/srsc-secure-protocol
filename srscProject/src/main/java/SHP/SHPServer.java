@@ -18,7 +18,7 @@ import SHP.messages.MessageType5;
 
 public class SHPServer {
 
-    public static void initConnection(String filesPath, int serverPort) {
+    public static ConnectionResult initConnection(String filesPath, int serverPort) {
         Security.addProvider(new BouncyCastleProvider());
         User.setFilePath(filesPath);
 
@@ -28,20 +28,16 @@ public class SHPServer {
             Socket clientSocket = serverSocket.accept();
             System.out.println("Client connected: " + clientSocket.getInetAddress());
 
-            boolean connectionResult = handleClient(clientSocket);
-
-            if (connectionResult) {
-                System.out.println("Connection successful.");
-            } else {
-                System.out.println("Connection failed.");
-            }
+            return handleClient(clientSocket);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
-    private static boolean handleClient(Socket clientSocket) {
+    private static ConnectionResult handleClient(Socket clientSocket) {
         try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
                 DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
@@ -86,7 +82,10 @@ public class SHPServer {
                     messageType4.getNonce5());
             messageType5.receive(in);
 
-            return true;
+            return new ConnectionResult(
+                messageType3.getUdpPort(),
+                messageType3.getRequest()
+            );
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,7 +93,7 @@ public class SHPServer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return false;
+        return null;
     }
 
 }

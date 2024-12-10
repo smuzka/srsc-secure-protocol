@@ -26,8 +26,10 @@ public class MulticastReceiver {
                 "srscProject/src/main/resources/",
                 "localhost",
                 12345,
+                9999,
                 "user0",
-                "Password!0"
+                "Password!0",
+                "test"
         );
 
         EncryptedMulticastSocket rs = new EncryptedMulticastSocket(port);

@@ -17,18 +17,19 @@ import SHP.SHPClient;
 
 class hjUDPproxy {
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            System.out.println("Use: hjUDPproxy <endpoint1> <endpoint2>");
-            System.out.println("<endpoint1>: endpoint for receiving stream");
-            System.out.println("<endpoint2>: endpoint of media player");
+        if (args.length != 7) {
+            System.out.println("Use: hjUDPproxy <username> <password> <server> <tcp_port> <movie> <udp_port> <player_port>");
+            System.out.println("username: username as registered in the user database, server side password: user password\n" +
+                    "server: the server host machine (DNS name) or IP addres\n" +
+                    "tcp_port: the tcp port where the server is waiting\n" +
+                    "movie: the requested movie\n" +
+                    "udp_port: the udp_port where the client will receive the movie for real-time playing player_port: the udp_port of the player that will play the streamed movie");
 
-            System.out.println("Ex: hjUDPproxy 224.2.2.2:9000  127.0.0.1:8888");
-            System.out.println("Ex: hjUDPproxy 127.0.0.1:10000 127.0.0.1:8888");
             System.exit(0);
         }
 
-        String remote = args[0]; // receive mediastream from this rmote endpoint
-        String destinations = args[1]; // resend mediastream to this destination endpoint
+        String remote = args[2] + ":" + args[5]; // receive mediastream from this rmote endpoint
+        String destinations = args[2] + ":" + args[6]; // resend mediastream to this destination endpoint
 
         InetSocketAddress inSocketAddress = parseSocketAddress(remote);
         Set<SocketAddress> outSocketAddressSet = Arrays.stream(destinations.split(",")).map(s -> parseSocketAddress(s))
@@ -47,10 +48,12 @@ class hjUDPproxy {
 
         SHPClient.initConnection(
                 "srscProject/src/main/resources/",
-                "localhost",
-                12345,
-                "user0",
-                "Password!0"
+                args[2],
+                Integer.parseInt(args[3]),
+                Integer.parseInt(args[5]),
+                args[0],
+                args[1],
+                args[4]
         );
 
         while (true) {
