@@ -6,6 +6,7 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import javax.crypto.IllegalBlockSizeException;
@@ -29,6 +30,12 @@ public class MessageType4 extends Message {
     private String userId;
     private String requestConfirmation;
     private String cryptoConfig;
+    private String password;
+
+    public MessageType4(String password, String userId) {
+        this.password = password;
+        this.userId = userId;
+    }
 
     public MessageType4(byte[] nonce4, byte[] nonce5, String userId, String requestConfirmation, String cryptoConfig) {
         this.nonce4 = nonce4;
@@ -38,29 +45,11 @@ public class MessageType4 extends Message {
         this.requestConfirmation = requestConfirmation;
     }
 
-    // public MessageType4(String password, byte[] salt, byte[] counter, String
-    // request, String userId, byte[] nonce1,
-    // byte[] nonce2, int udpPort) {
-    // this.password = password;
-    // this.salt = salt;
-    // this.counter = counter;
-    // this.request = request;
-    // this.userId = userId;
-    // this.nonce1 = nonce1;
-    // this.nonce2 = nonce2;
-    // this.udpPort = udpPort;
-    // }
-
     @Override
     public byte[] toByteArray() {
         byte[] serializedPayload = createSerializedPayload();
 
         // Encrypt with users public key
-
-        // cipher.init(Cipher.DECRYPT_MODE, ecKeyPair.getPrivate());
-        // byte[] plaintext = cipher.doFinal(cipherText);
-
-        // System.out.println("plain : " + new String(plaintext));
         byte[] EPayload = EEncrypt(serializedPayload, getUserPublicKeyFromClientFile(userId));
         byte[] EPayloadSerialized = Serializer.serializeBytes(EPayload);
 
@@ -86,20 +75,68 @@ public class MessageType4 extends Message {
         }
     }
 
+    private byte[] EDecrypt(byte[] data, String privateKeyString) {
+        try {
+            Cipher cipher = Cipher.getInstance("ECIES", "BC");
+            PrivateKey privateKey = Util.getPrivateKeyFromString(privateKeyString);
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private byte[] createSerializedPayload() {
+        byte[] requestConfirmationSerialized = Serializer.serializeString(requestConfirmation);
+        byte[] userIdSerialized = Serializer.serializeString(userId);
         byte[] nonce4Serialized = Serializer.serializeBytes(nonce4);
         byte[] nonce5Serialized = Serializer.serializeBytes(nonce5);
-        byte[] requestConfirmationSerialized = Serializer.serializeString(requestConfirmation);
         byte[] cryptoConfigSerialized = Serializer.serializeString(cryptoConfig);
-        byte[] userIdSerialized = Serializer.serializeString(userId);
 
-        return Util.mergeArrays(nonce4Serialized, nonce5Serialized, requestConfirmationSerialized,
-                cryptoConfigSerialized, userIdSerialized);
+        return Util.mergeArrays(requestConfirmationSerialized, userIdSerialized, nonce4Serialized, nonce5Serialized,
+                cryptoConfigSerialized);
     }
 
     @Override
     public void fromByteArray(byte[] data) {
-        // this.numbers = data; // Deserialize numbers
+        // Extract the HMAC from the end of the byte array
+        byte[] hMac = Arrays.copyOfRange(data, data.length - HMAC.getHMACLength(), data.length);
+        byte[] remainingBytes = Arrays.copyOfRange(data, 0, data.length - HMAC.getHMACLength());
+        HMAC.verifyHMAC(hMac, remainingBytes, Util.hashPassword(password));
+
+        // Deserialize the remaining bytes
+        Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(remainingBytes);
+        decryptAndDeserializeData(dataDeserialized.getExtractedBytes());
+
+        Serializer<byte[]> digitalSignatureDeserialized = Serializer
+                .deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
+        Util.verifySignature(digitalSignatureDeserialized.getExtractedBytes(),
+                createSerializedPayload(),
+                getUserPublicKeyFromClientFile(userId));
+    }
+
+    private void decryptAndDeserializeData(byte[] data) {
+        data = EDecrypt(data, getUserPrivateKeyFromClientFile(userId));
+
+        Serializer<String> requestConfirmationDeserialized = Serializer.deserializeFirstStringInArray(data);
+        this.requestConfirmation = requestConfirmationDeserialized.getExtractedBytes();
+
+        Serializer<String> userIdDeserialized = Serializer
+                .deserializeFirstStringInArray(requestConfirmationDeserialized.getRemainingBytes());
+        this.userId = userIdDeserialized.getExtractedBytes();
+
+        Serializer<byte[]> nonce4Deserialized = Serializer
+                .deserializeFirstBytesInArray(userIdDeserialized.getRemainingBytes());
+        this.nonce4 = nonce4Deserialized.getExtractedBytes();
+
+        Serializer<byte[]> nonce5Deserialized = Serializer
+                .deserializeFirstBytesInArray(nonce4Deserialized.getRemainingBytes());
+        this.nonce5 = nonce5Deserialized.getExtractedBytes();
+
+        Serializer<String> cryptoConfigDeserialized = Serializer
+                .deserializeFirstStringInArray(nonce5Deserialized.getRemainingBytes());
+        this.cryptoConfig = cryptoConfigDeserialized.getExtractedBytes();
     }
 
     @Override
@@ -109,8 +146,7 @@ public class MessageType4 extends Message {
 
     @Override
     public String toString() {
-        return "MessageType4: ";
-        // return "MessageType4: " + Arrays.toString(numbers);
-        // make it return the actual values
+        return "MessageType4: " + "request-confirmation=" + requestConfirmation + ", userId=" + userId + ", nonce4="
+                + Arrays.toString(nonce4) + ", nonce5=" + Arrays.toString(nonce5) + ", cryptoConfig=" + cryptoConfig;
     }
 }

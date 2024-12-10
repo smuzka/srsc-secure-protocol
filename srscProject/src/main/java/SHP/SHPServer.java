@@ -53,7 +53,7 @@ public class SHPServer {
             messageType3.receive(in);
 
             MessageType4 messageType4 = new MessageType4(
-                    messageType3.getNonce4(),
+                    Util.intToBytes(Util.bytesToInt(messageType3.getNonce4()) + 1),
                     Util.createNonce(), // nonce5
                     new String(messageType1.getUserId()),
                     "ToDo - change confirmation request",

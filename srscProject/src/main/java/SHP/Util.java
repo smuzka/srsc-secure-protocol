@@ -4,8 +4,10 @@ import java.nio.ByteBuffer;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
@@ -23,6 +25,20 @@ public class Util {
         return nonce;
     }
 
+    public static PrivateKey getPrivateKeyFromString(String key) {
+        try {
+            byte[] byteKey = Base64.getDecoder().decode(key);
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(byteKey);
+
+            return keyFactory.generatePrivate(keySpec);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static PublicKey getPublicKeyFromString(String key) {
         try {
             byte[] byteKey = Base64.getDecoder().decode(key);
@@ -35,6 +51,14 @@ public class Util {
         }
 
         return null;
+    }
+
+    public static void verifySignature(byte[] digitalSignature, byte[] data, String publicKeyString) {
+        boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature,
+                data, publicKeyString);
+        if (!signatureVerificatied) {
+            throw new RuntimeException("Signature verification failed");
+        }
     }
 
     public static byte[] hashPassword(String password) {

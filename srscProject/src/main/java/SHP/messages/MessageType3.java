@@ -90,7 +90,9 @@ public class MessageType3 extends Message {
 
         Serializer<byte[]> digitalSignatureDeserialized = Serializer
                 .deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
-        verifySignature(digitalSignatureDeserialized.getExtractedBytes());
+        Util.verifySignature(digitalSignatureDeserialized.getExtractedBytes(),
+                createSerializedPayload(),
+                getUserPublicKeyFromClientFile(userId));
     }
 
     private void decryptAndDeserializeData(byte[] data) {
@@ -114,14 +116,6 @@ public class MessageType3 extends Message {
         Serializer<Integer> udpPortDeserialized = Serializer
                 .deserializeFirstIntInArray(nonce2Deserialized.getRemainingBytes());
         this.udpPort = udpPortDeserialized.getExtractedBytes();
-    }
-
-    private void verifySignature(byte[] digitalSignature) {
-        boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature,
-                createSerializedPayload(), getUserPublicKeyFromClientFile(userId));
-        if (!signatureVerificatied) {
-            throw new RuntimeException("Signature verification failed");
-        }
     }
 
     public byte[] getNonce4() {

@@ -43,8 +43,8 @@ public class SHPClient {
                     serverPort);
             messageType3.send(out);
 
-            // MessageType4 messageType4 = new MessageType4();
-            // messageType4.receive(in);
+            MessageType4 messageType4 = new MessageType4(userPassword, userId);
+            messageType4.receive(in);
         } catch (Exception e) {
             e.printStackTrace();
         }
