@@ -24,18 +24,23 @@ public class SHPServer {
         try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
             System.out.println("Server is running...");
 
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Client connected: " + clientSocket.getInetAddress());
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("Client connected: " + clientSocket.getInetAddress());
 
-                new Thread(() -> handleClient(clientSocket)).start();
+            boolean connectionResult = handleClient(clientSocket);
+
+            if (connectionResult) {
+                System.out.println("Connection successful.");
+            } else {
+                System.out.println("Connection failed.");
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void handleClient(Socket clientSocket) {
+    private static boolean handleClient(Socket clientSocket) {
         try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
              DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
@@ -81,12 +86,15 @@ public class SHPServer {
             );
             messageType5.receive(in);
 
+            return true;
+
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Client disconnected.");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return false;
     }
 
 }
