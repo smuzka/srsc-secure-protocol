@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 
 import SHP.ECDSADigitalSignature;
+import SHP.HMAC;
 import SHP.Serializer;
 import SHP.Util;
 
@@ -31,7 +32,6 @@ public class MessageType3 extends Message {
     private byte[] nonce1;
     private byte[] nonce2;
     private int udpPort;
-    private static String hmacAlgorithm = "HMacSHA3-512";
 
     public MessageType3(byte[] salt, byte[] counter, String userId) {
         this.salt = salt;
@@ -64,7 +64,7 @@ public class MessageType3 extends Message {
         byte[] digitalSignatureSerialized = Serializer.serializeBytes(digitalSignature);
 
         byte[] X = Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized);
-        byte[] hMac = generateHMAC(X, hashPassword(password));
+        byte[] hMac = HMAC.generateHMAC(X, hashPassword(password));
 
         return Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized, hMac);
     }
@@ -82,16 +82,11 @@ public class MessageType3 extends Message {
 
     @Override
     public void fromByteArray(byte[] data) {
-        int hMacLength;
-        try {
-            hMacLength = Mac.getInstance(hmacAlgorithm).getMacLength();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Selected hmac algorithm not found", e);
-        }
+
         // Extract the HMAC from the end of the byte array
-        byte[] hMac = Arrays.copyOfRange(data, data.length - hMacLength, data.length);
-        byte[] remainingBytes = Arrays.copyOfRange(data, 0, data.length - hMacLength);
-        verifyHMAC(hMac, remainingBytes);
+        byte[] hMac = Arrays.copyOfRange(data, data.length - HMAC.getHMACLength(), data.length);
+        byte[] remainingBytes = Arrays.copyOfRange(data, 0, data.length - HMAC.getHMACLength());
+        HMAC.verifyHMAC(hMac, remainingBytes, getUserPasswordFromFile(userId).getBytes());
 
         // Deserialize the remaining bytes
         Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(remainingBytes);
@@ -134,33 +129,11 @@ public class MessageType3 extends Message {
         }
     }
 
-    private void verifyHMAC(byte[] hMac, byte[] data) {
-        byte[] generatedHMAC = generateHMAC(data, getUserPasswordFromFile(userId).getBytes());
-        if (!Arrays.equals(hMac, generatedHMAC)) {
-            throw new RuntimeException("HMAC verification failed");
-        }
-    }
-
     private void verifySignature(byte[] digitalSignature) {
         boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature,
                 createSerializedPayload(), getUserPublicKeyFromClientFile(userId));
         if (!signatureVerificatied) {
             throw new RuntimeException("Signature verification failed");
-        }
-    }
-
-    private byte[] generateHMAC(byte[] data, byte[] passwordHash) {
-        Mac hMac;
-        try {
-            hMac = Mac.getInstance(hmacAlgorithm);
-            Key hMacKey = new SecretKeySpec(passwordHash, hmacAlgorithm);
-            hMac.init(hMacKey);
-            hMac.update(data);
-            return hMac.doFinal();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Selected hmac algorithm not found", e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException("Invalid key for hmac algorithm", e);
         }
     }
 
