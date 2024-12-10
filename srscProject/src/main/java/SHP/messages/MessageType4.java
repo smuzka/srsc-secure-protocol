@@ -6,9 +6,10 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 
 import java.security.KeyPair;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.BadPaddingException;
 
 import SHP.ECDSADigitalSignature;
 import SHP.HMAC;
@@ -20,6 +21,7 @@ import static SHP.PBEEncryptor.PBEEncrypt;
 import static SHP.User.getUserPrivateKeyFromClientFile;
 import static SHP.User.getUserPublicKeyFromClientFile;
 import static SHP.User.getUserPasswordFromFile;
+import java.security.KeyPair;
 
 public class MessageType4 extends Message {
     private byte[] nonce4;
@@ -53,30 +55,35 @@ public class MessageType4 extends Message {
     public byte[] toByteArray() {
         byte[] serializedPayload = createSerializedPayload();
 
-        // byte[] PBEPayload = PBEEncrypt(serializedPayload, password, salt, counter);
-        // byte[] PBEPayloadSerialized = Serializer.serializeBytes(PBEPayload);
-
         // Encrypt with users public key
-        Cipher cipher=Cipher.getInstance("ECIES", "BC");
 
-        cipher.init(Cipher.ENCRYPT_MODE, getUserPublicKeyFromClientFile(userId));
-        byte[] cipherText=cipher.doFinal(input);
-        System.out.println("Cipher: " + Utils3.toHex(cipherText));
-        System.out.println("Len: " + cipherText.length + " Bytes");
+        // cipher.init(Cipher.DECRYPT_MODE, ecKeyPair.getPrivate());
+        // byte[] plaintext = cipher.doFinal(cipherText);
 
-        cipher.init(Cipher.DECRYPT_MODE, ecKeyPair.getPrivate());
-        byte[] plaintext = cipher.doFinal(cipherText);
-
-        System.out.println("plain : " + new String(plaintext));
+        // System.out.println("plain : " + new String(plaintext));
+        byte[] EPayload = EEncrypt(serializedPayload, getUserPublicKeyFromClientFile(userId));
+        byte[] EPayloadSerialized = Serializer.serializeBytes(EPayload);
 
         String userPrivateKey = getUserPrivateKeyFromClientFile(userId);
         byte[] digitalSignature = ECDSADigitalSignature.sign(serializedPayload, userPrivateKey);
         byte[] digitalSignatureSerialized = Serializer.serializeBytes(digitalSignature);
 
-        byte[] X = Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized, );
-        byte[] hMac = HMAC.generateHMAC(X, Util.hashPassword(password));
+        byte[] X = Util.mergeArrays(EPayloadSerialized, digitalSignatureSerialized);
+        byte[] hMac = HMAC.generateHMAC(X, getUserPasswordFromFile(userId).getBytes());
 
-        return Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized, hMac);
+        return Util.mergeArrays(EPayloadSerialized, digitalSignatureSerialized, hMac);
+    }
+
+    private byte[] EEncrypt(byte[] data, String publicKeyString) {
+        try {
+            Cipher cipher = Cipher.getInstance("ECIES", "BC");
+            PublicKey publicKey = Util.getPublicKeyFromString(publicKeyString);
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private byte[] createSerializedPayload() {
