@@ -2,6 +2,12 @@ package SHP.messages;
 
 import java.util.Arrays;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.InvalidKeyException;
+
 import SHP.ECDSADigitalSignature;
 import SHP.Serializer;
 import SHP.Util;
@@ -23,14 +29,14 @@ public class MessageType3 extends Message {
     private byte[] nonce2;
     private int udpPort;
 
-
     public MessageType3(byte[] salt, byte[] counter, String userId) {
         this.salt = salt;
         this.counter = counter;
         this.userId = userId;
     }
 
-    public MessageType3(String password, byte[] salt, byte[] counter, String request, String userId, byte[] nonce1, byte[] nonce2, int udpPort) {
+    public MessageType3(String password, byte[] salt, byte[] counter, String request, String userId, byte[] nonce1,
+            byte[] nonce2, int udpPort) {
         this.password = password;
         this.salt = salt;
         this.counter = counter;
@@ -53,7 +59,10 @@ public class MessageType3 extends Message {
         byte[] digitalSignature = ECDSADigitalSignature.sign(serializedPayload, userPrivateKey);
         byte[] digitalSignatureSerialized = Serializer.serializeBytes(digitalSignature);
 
-        return Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized);
+        byte[] X = Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized);
+        byte[] hMac = generateHMAC(X);
+        byte[] hMacSerialized = Serializer.serializeBytes(hMac);
+        return Util.mergeArrays(PBEPayloadSerialized, digitalSignatureSerialized, hMacSerialized);
     }
 
     private byte[] createSerializedPayload() {
@@ -63,7 +72,8 @@ public class MessageType3 extends Message {
         byte[] nonce2Serialized = Serializer.serializeBytes(nonce2);
         byte[] udpPortSerialized = Serializer.serializeInt(udpPort);
 
-        return Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized, udpPortSerialized);
+        return Util.mergeArrays(requestSerialized, userIdSerialized, nonce1Serialized, nonce2Serialized,
+                udpPortSerialized);
     }
 
     @Override
@@ -71,33 +81,54 @@ public class MessageType3 extends Message {
         Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(data);
         decryptAndDeserializeData(dataDeserialized.getExtractedBytes());
 
-        Serializer<byte[]> digitalSignatureDeserialized = Serializer.deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
+        Serializer<byte[]> digitalSignatureDeserialized = Serializer
+                .deserializeFirstBytesInArray(dataDeserialized.getRemainingBytes());
         verifySignature(digitalSignatureDeserialized.getExtractedBytes());
     }
 
-    private void decryptAndDeserializeData (byte[] data) {
+    private void decryptAndDeserializeData(byte[] data) {
         data = PBEDecrypt(data, userId, salt, counter);
 
         Serializer<String> requestDeserialized = Serializer.deserializeFirstStringInArray(data);
         this.request = requestDeserialized.getExtractedBytes();
 
-        Serializer<String> userIdDeserialized = Serializer.deserializeFirstStringInArray(requestDeserialized.getRemainingBytes());
+        Serializer<String> userIdDeserialized = Serializer
+                .deserializeFirstStringInArray(requestDeserialized.getRemainingBytes());
         this.userId = userIdDeserialized.getExtractedBytes();
 
-        Serializer<byte[]> nonce1Deserialized = Serializer.deserializeFirstBytesInArray(userIdDeserialized.getRemainingBytes());
+        Serializer<byte[]> nonce1Deserialized = Serializer
+                .deserializeFirstBytesInArray(userIdDeserialized.getRemainingBytes());
         this.nonce1 = nonce1Deserialized.getExtractedBytes();
 
-        Serializer<byte[]> nonce2Deserialized = Serializer.deserializeFirstBytesInArray(nonce1Deserialized.getRemainingBytes());
+        Serializer<byte[]> nonce2Deserialized = Serializer
+                .deserializeFirstBytesInArray(nonce1Deserialized.getRemainingBytes());
         this.nonce2 = nonce2Deserialized.getExtractedBytes();
 
-        Serializer<Integer> udpPortDeserialized = Serializer.deserializeFirstIntInArray(nonce2Deserialized.getRemainingBytes());
+        Serializer<Integer> udpPortDeserialized = Serializer
+                .deserializeFirstIntInArray(nonce2Deserialized.getRemainingBytes());
         this.udpPort = udpPortDeserialized.getExtractedBytes();
     }
 
     private void verifySignature(byte[] digitalSignature) {
-        boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature, createSerializedPayload(), getUserPublicKeyFromClientFile(userId));
+        boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature,
+                createSerializedPayload(), getUserPublicKeyFromClientFile(userId));
         if (!signatureVerificatied) {
             throw new RuntimeException("Signature verification failed");
+        }
+    }
+
+    private byte[] generateHMAC(byte[] data) {
+        Mac hMac;
+        try {
+            hMac = Mac.getInstance("HMacSHA3-512");
+            Key hMacKey = new SecretKeySpec(password.getBytes(), "HMacSHA3-512");
+            hMac.init(hMacKey);
+            hMac.update(data);
+            return hMac.doFinal();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("HMacSHA3-512 algorithm not found", e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid key for HMacSHA3-512", e);
         }
     }
 
@@ -108,6 +139,7 @@ public class MessageType3 extends Message {
 
     @Override
     public String toString() {
-        return "MessageType3: " + "request=" + request + ", userId=" + userId + ", nonce1=" + Arrays.toString(nonce1) + ", nonce2=" + Arrays.toString(nonce2) + ", udpPort=" + udpPort;
+        return "MessageType3: " + "request=" + request + ", userId=" + userId + ", nonce1=" + Arrays.toString(nonce1)
+                + ", nonce2=" + Arrays.toString(nonce2) + ", udpPort=" + udpPort;
     }
 }
