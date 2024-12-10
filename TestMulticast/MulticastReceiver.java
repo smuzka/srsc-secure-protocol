@@ -23,6 +23,7 @@ public class MulticastReceiver {
         }
 
         SHPClient.initConnection(
+                "srscProject/src/main/resources/",
                 "localhost",
                 12345,
                 "user0",

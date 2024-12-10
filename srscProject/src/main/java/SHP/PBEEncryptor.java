@@ -26,6 +26,11 @@ public class PBEEncryptor {
             Key sKey = keyFact.generateSecret(pbeSpec);
 
             Cipher cEnc = Cipher.getInstance(ALGORITHM, PROVIDER);
+//            Sometimes it gets stuck and I don't know why. What I tried:
+//            - running in different nodes
+//            - adding -Djava.security.egd=file:/dev/urandom to ensure the secure random generator does not block
+//            - adding bouncy castle as direct dependency
+//            Good news is running program again solves the problem :')
             cEnc.init(Cipher.ENCRYPT_MODE, sKey, new PBEParameterSpec(salt, counter));
 
             return cEnc.doFinal(data);

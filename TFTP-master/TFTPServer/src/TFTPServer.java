@@ -12,6 +12,7 @@ import javax.crypto.ShortBufferException;
 
 import DSTP.DSTP;
 import DSTP.EncryptedDatagramSocket;
+import SHP.SHPServer;
 
 public class TFTPServer {
 
@@ -20,6 +21,11 @@ public class TFTPServer {
 			//use port 6973
 			EncryptedDatagramSocket sock = new EncryptedDatagramSocket(6973);
 			System.out.println("Server Ready.  Port:  " + sock.getLocalPort());
+
+			SHPServer.initConnection(
+					"../../../srscProject/src/main/resources/",
+					12345
+			);
 
 			// Listen for requests
 			while (true) {

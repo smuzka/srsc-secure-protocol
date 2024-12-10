@@ -18,8 +18,9 @@ import SHP.messages.MessageType5;
 
 public class SHPServer {
 
-    public static void initConnection(int serverPort) {
+    public static void initConnection(String filesPath, int serverPort) {
         Security.addProvider(new BouncyCastleProvider());
+        User.setFilePath(filesPath);
 
         try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
             System.out.println("Server is running...");

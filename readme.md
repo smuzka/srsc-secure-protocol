@@ -14,6 +14,7 @@ mvn package
   ```
   javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar TestMulticast/MulticastReceiver.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./TestMulticast MulticastReceiver 224.0.0.5 8181
   ```
+If it gets stuck, just run it again. 
 
 * compile and run MulticastSender
   ```
@@ -34,8 +35,6 @@ mvn package
   ```
 
 ## TFTP-master
-  
-Change path in file srscProject/src/main/java/DSTP/utils/ReadFile.java, to run commands from correct folder and be able to save files
 
 * Run from /TFTP-master/TFTPServer/src
   ```

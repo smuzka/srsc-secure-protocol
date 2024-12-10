@@ -4,9 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 public class User {
-    private final static String databaseFilePath = "srscProject/src/main/resources/userDatabase.txt";
-    private final static String clientKeysFilePath = "srscProject/src/main/resources/clientEccKeyPair.sec";
-    private final static String serverKeysFilePath = "srscProject/src/main/resources/ServerEccKeyPair.sec";
+    private static String databaseFilePath;
+    private static String clientKeysFilePath;
+    private static String serverKeysFilePath;
+
+    public static void setFilePath (String filePath) {
+        databaseFilePath = filePath + "userDatabase.txt";
+        clientKeysFilePath = filePath + "clientEccKeyPair.sec";
+        serverKeysFilePath = filePath + "ServerEccKeyPair.sec";
+    }
 
     public static String getUserPasswordFromFile(String userId) {
         try (BufferedReader br = new BufferedReader(new FileReader(databaseFilePath))) {

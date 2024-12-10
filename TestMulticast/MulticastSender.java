@@ -26,6 +26,7 @@ public class MulticastSender {
         }
 
         SHPServer.initConnection(
+                "srscProject/src/main/resources/",
                 12345
         );
 

@@ -17,11 +17,13 @@ import SHP.messages.MessageType5;
 public class SHPClient {
 
     public static void initConnection(
+            String filesPath,
             String serverAddress,
             int serverPort,
             String userId,
             String userPassword) {
         Security.addProvider(new BouncyCastleProvider());
+        User.setFilePath(filesPath);
 
         try (Socket socket = new Socket(serverAddress, serverPort);
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());

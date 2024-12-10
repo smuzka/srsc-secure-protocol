@@ -2,6 +2,9 @@
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import SHP.SHPClient;
+
 class UseException extends Exception {
 	public UseException() {
 		super();
@@ -38,7 +41,15 @@ public class TFTPClient {
 			
 			
 			InetAddress server = InetAddress.getByName(host);
-			
+
+			SHPClient.initConnection(
+					"../../../srscProject/src/main/resources/",
+					"localhost",
+					12345,
+					"user0",
+					"Password!0"
+			);
+
 			//process read request
 			if(type.matches("R")){
 				TFTPclientRRQ r = new TFTPclientRRQ(server, fileName, mode);}
