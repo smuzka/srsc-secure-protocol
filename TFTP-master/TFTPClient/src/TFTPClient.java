@@ -26,16 +26,16 @@ public class TFTPClient {
 			if (argv.length == 0)
 				throw new UseException("--Usage-- \nocter mode:  TFTPClient [host] [Type(R/W?)] [filename] \nother mode:  TFTPClient [host] [Type(R/W?)] [filename] [mode]" );
 			//use default mode(octet)
-			if(argv.length == 3){
-				host =argv[0];
-			    type = argv[argv.length - 2];
-			    fileName = argv[argv.length - 1];}
+			if(argv.length == 5){
+				host =argv[2];
+			    type = argv[3];
+			    fileName = argv[4];}
 			//use other modes
-			else if(argv.length == 4){
+			else if(argv.length == 6){
 				host = argv[0];
-				mode =argv[argv.length-1];
-				type = argv[argv.length - 3];
-				fileName = argv[argv.length - 2];
+				mode =argv[5];
+				type = argv[3];
+				fileName = argv[4];
 			}
 			else throw new UseException("wrong command. \n--Usage-- \nocter mode:  TFTPClient [host] [Type(R/W?)] [filename] \nother mode:  TFTPClient [host] [Type(R/W?)] [filename] [mode]");
 			
@@ -44,13 +44,12 @@ public class TFTPClient {
 
 			SHPClient.initConnection(
 					"../../../srscProject/src/main/resources/",
-					"localhost",
+					"127.0.0.1",
 					12345,
 					9999,
-					"user0",
-					"Password!0",
-//					ToDo change
-					"test"
+					argv[0],
+					argv[1],
+					argv[4]
 			);
 
 			//process read request

@@ -31,17 +31,17 @@ If it gets stuck, just run it again.
 
 * compile and run Proxy
   ```
-  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjUDPproxy/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjUDPproxy hjUDPproxy user0 Password!0 127.0.0.1 12345 monsters.dat 10000 8888
+  javac -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar StreamingService/hjUDPproxy/*.java && java -cp srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./StreamingService/hjUDPproxy hjUDPproxy user0 'Password!0' 127.0.0.1 12345 monsters.dat 10000 8888
   ```
 
 ## TFTP-master
 
 * Run from /TFTP-master/TFTPServer/src
   ```
-  javac -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar ./*.java && java -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./ TFTPServer  
+  javac -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar ./*.java && java -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./ TFTPServer 12345  
   ```
   
 * Run from /TFTP-master/TFTPClient/src
   ```
-  javac -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar ./*.java && java -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./ TFTPClient 127.0.0.1 R server1.jpg
+  javac -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar ./*.java && java -cp ../../../srscProject/target/SRSCProject-1.0-SNAPSHOT.jar:./ TFTPClient user0 'Password!0' 127.0.0.1 R server1.jpg
   ```

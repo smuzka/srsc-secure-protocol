@@ -17,6 +17,11 @@ import SHP.SHPServer;
 public class TFTPServer {
 
 	public static void main(String argv[]) {
+		if (argv.length != 1) {
+			System.out.println("Usage:  java TFTPServer tcp_port");
+			System.exit(1);
+		}
+
 		try {
 			//use port 6973
 			EncryptedDatagramSocket sock = new EncryptedDatagramSocket(6973);
@@ -24,7 +29,7 @@ public class TFTPServer {
 
 			SHPServer.initConnection(
 					"../../../srscProject/src/main/resources/",
-					12345
+                    Integer.parseInt(argv[0])
 			);
 
 			// Listen for requests
