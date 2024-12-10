@@ -91,12 +91,7 @@ public class MessageType3 extends Message {
         // Extract the HMAC from the end of the byte array
         byte[] hMac = Arrays.copyOfRange(data, data.length - hMacLength, data.length);
         byte[] remainingBytes = Arrays.copyOfRange(data, 0, data.length - hMacLength);
-        byte[] generatedHMAC = generateHMAC(remainingBytes, getUserPasswordFromFile(userId).getBytes());
-
-        // Verify the HMAC
-        if (!Arrays.equals(hMac, generatedHMAC)) {
-            throw new RuntimeException("HMAC verification failed");
-        }
+        verifyHMAC(hMac, remainingBytes);
 
         // Deserialize the remaining bytes
         Serializer<byte[]> dataDeserialized = Serializer.deserializeFirstBytesInArray(remainingBytes);
@@ -136,6 +131,13 @@ public class MessageType3 extends Message {
             return Base64.getEncoder().encodeToString(passwordHash).getBytes();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Sha-256 algorithm not found", e);
+        }
+    }
+
+    private void verifyHMAC(byte[] hMac, byte[] data) {
+        byte[] generatedHMAC = generateHMAC(data, getUserPasswordFromFile(userId).getBytes());
+        if (!Arrays.equals(hMac, generatedHMAC)) {
+            throw new RuntimeException("HMAC verification failed");
         }
     }
 
