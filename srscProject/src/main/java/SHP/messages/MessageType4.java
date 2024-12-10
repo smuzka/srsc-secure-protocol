@@ -1,28 +1,17 @@
 package SHP.messages;
 
 import java.util.Arrays;
-import java.util.Base64;
-
-import javax.crypto.Cipher;
-
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.BadPaddingException;
 
 import SHP.ECDSADigitalSignature;
 import SHP.HMAC;
 import SHP.Serializer;
 import SHP.Util;
 
-import static SHP.PBEEncryptor.PBEDecrypt;
-import static SHP.PBEEncryptor.PBEEncrypt;
+import static SHP.EEncryptor.EDecrypt;
+import static SHP.EEncryptor.EEncrypt;
 import static SHP.User.getUserPrivateKeyFromClientFile;
 import static SHP.User.getUserPublicKeyFromClientFile;
 import static SHP.User.getUserPasswordFromFile;
-import java.security.KeyPair;
 
 public class MessageType4 extends Message {
     private byte[] nonce4;
@@ -61,30 +50,6 @@ public class MessageType4 extends Message {
         byte[] hMac = HMAC.generateHMAC(X, getUserPasswordFromFile(userId).getBytes());
 
         return Util.mergeArrays(EPayloadSerialized, digitalSignatureSerialized, hMac);
-    }
-
-    private byte[] EEncrypt(byte[] data, String publicKeyString) {
-        try {
-            Cipher cipher = Cipher.getInstance("ECIES", "BC");
-            PublicKey publicKey = Util.getPublicKeyFromString(publicKeyString);
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            return cipher.doFinal(data);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private byte[] EDecrypt(byte[] data, String privateKeyString) {
-        try {
-            Cipher cipher = Cipher.getInstance("ECIES", "BC");
-            PrivateKey privateKey = Util.getPrivateKeyFromString(privateKeyString);
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            return cipher.doFinal(data);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private byte[] createSerializedPayload() {
