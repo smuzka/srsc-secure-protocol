@@ -61,10 +61,11 @@ public class MessageType5 extends Message {
 
         Serializer<byte[]> nonce5Deserialized = Serializer
                 .deserializeFirstBytesInArray(synchronizationString.getRemainingBytes());
+        this.nonce5 = nonce5Deserialized.getExtractedBytes();
 
-        Util.verifyNonce(nonce5_previous, nonce5Deserialized.getExtractedBytes());
+        Util.verifyNonce(nonce5_previous, nonce5);
 
-        System.out.println("MessageType5 received: " + Arrays.toString(nonce5Deserialized.getExtractedBytes()));
+        System.out.println("MessageType5 received: " + Arrays.toString(nonce5));
         System.out.println("MessageType5 previous: " + Arrays.toString(nonce5_previous));
     }
 
@@ -106,7 +107,6 @@ public class MessageType5 extends Message {
 
     @Override
     public String toString() {
-        return "MessageType5: " + "nonce5=" + Arrays.toString(nonce5) + "nonce5_previous="
-                + Arrays.toString(nonce5_previous);
+        return "MessageType5: " + "nonce5=" + Arrays.toString(nonce5);
     }
 }
