@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ReadFile {
     public static String readFileContent(String filePath) {
@@ -21,6 +22,14 @@ public class ReadFile {
         }
 
         return content.toString();
+    }
+
+    public static String mapToString(Map<String, String> map) {
+
+        return map.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .collect(Collectors.joining("\n"));
     }
 
     public static Map<String, String> getVariables(String[] args) {

@@ -13,6 +13,7 @@ import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.Security;
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.DHParameterSpec;
@@ -65,6 +66,7 @@ public class SHPServerP2 {
                     new String(messageType1.getUserId()));
 
             messageType3.receive(in);
+
             // Parametro para o gerador do Grupo de Cobertura de P
             BigInteger g512 = new BigInteger(
                     "153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7"
@@ -91,14 +93,19 @@ public class SHPServerP2 {
             System.out.println("Server generated\n" +
                     Arrays.toString(sShared));
 
-            String cryptoConfig = ReadFile.readFileContent("srscProject/src/main/resources/ciphersuite.conf");
             byte[] symetricKey = Arrays.copyOfRange(sShared, 0, 16);
             byte[] macKey = Arrays.copyOfRange(sShared, 16, 32);
             String symetricKeyHex = Util.toHex(symetricKey, 16);
-            String macKeyHex = Util.toHex(symetricKey, 16);
-
+            String macKeyHex = Util.toHex(macKey, 16);
             System.out.println("Symetric key: " + symetricKeyHex);
             System.out.println("MAC key: " + macKeyHex);
+
+            String cryptoConfig = ReadFile.readFileContent("srscProject/src/main/resources/ciphersuite.conf");
+            Map<String, String> cryptoConfigMap = ReadFile.getVariables(cryptoConfig);
+            cryptoConfigMap.put("SYMMETRIC_KEY", symetricKeyHex);
+            cryptoConfigMap.put("MACKEY", macKeyHex);
+            cryptoConfig = ReadFile.mapToString(cryptoConfigMap);
+
             MessageType4P2 messageType4 = new MessageType4P2(
                     Util.incrementNonce(messageType3.getNonce4()),
                     Util.createNonce(), // nonce5
