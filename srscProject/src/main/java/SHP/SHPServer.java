@@ -57,25 +57,16 @@ public class SHPServer {
                     new String(messageType1.getUserId()));
             messageType3.receive(in);
 
+            String cryptoConfig = ReadFile.readFileContent("srscProject/src/main/resources/cryptoconfig.txt");
             MessageType4 messageType4 = new MessageType4(
-                    Util.intToBytes(Util.bytesToInt(messageType3.getNonce4()) + 1),
+                    Util.incrementNonce(messageType3.getNonce4()),
                     Util.createNonce(), // nonce5
                     new String(messageType1.getUserId()),
                     "ToDo - change confirmation request",
-                    "cryptoconfig");
+                    cryptoConfig);
             messageType4.send(out);
 
-            // ToDo: change configData to be read from a file
-            DSTP.init(
-                    "CONFIDENTIALITY: AES/CBC/PKCS5Padding\n" +
-                            "SYMMETRIC_KEY: 2b7e151628aed2a6abf7158809cf4f3c\n" +
-                            "SYMMETRIC_KEY_SIZE: 128\n" +
-                            "IV Size: 16\n" +
-                            "INTEGRITY: H\n" +
-                            "H: SHA-256\n" +
-                            "MAC: HMacSHA3-512\n" +
-                            "MACKEY: 1f1e1d1c1b1a19181716151413121111\n" +
-                            "MACKEY_SIZE: 128");
+            DSTP.init(cryptoConfig);
 
             MessageType5 messageType5 = new MessageType5(
                     new String(messageType1.getUserId()),
@@ -83,9 +74,8 @@ public class SHPServer {
             messageType5.receive(in);
 
             return new ConnectionResult(
-                messageType3.getUdpPort(),
-                messageType3.getRequest()
-            );
+                    messageType3.getUdpPort(),
+                    messageType3.getRequest());
 
         } catch (IOException e) {
             e.printStackTrace();

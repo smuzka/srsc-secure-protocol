@@ -114,6 +114,10 @@ public class MessageType4 extends Message {
         this.cryptoConfig = cryptoConfigDeserialized.getExtractedBytes();
     }
 
+    public String getCryptoConfig() {
+        return cryptoConfig;
+    }
+
     @Override
     public MessageType getType() {
         return MessageType.TYPE4;

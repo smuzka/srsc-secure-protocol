@@ -11,6 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.math.BigInteger;
 
 public class Util {
 
@@ -83,9 +84,32 @@ public class Util {
         return result;
     }
 
+    public static byte[] incrementNonce(byte[] nonce) {
+        if (nonce.length != 16) {
+            throw new IllegalArgumentException("Nonce must be 16 bytes long");
+        }
+
+        BigInteger nonceBigInt = new BigInteger(1, nonce);
+        BigInteger incrementedNonce = nonceBigInt.add(BigInteger.ONE);
+        byte[] incrementedNonceBytes = incrementedNonce.toByteArray();
+
+        // Ensure the byte array is 16 bytes long
+        if (incrementedNonceBytes.length > 16) {
+            incrementedNonceBytes = Arrays.copyOfRange(incrementedNonceBytes, incrementedNonceBytes.length - 16,
+                    incrementedNonceBytes.length);
+        } else if (incrementedNonceBytes.length < 16) {
+            byte[] temp = new byte[16];
+            System.arraycopy(incrementedNonceBytes, 0, temp, 16 - incrementedNonceBytes.length,
+                    incrementedNonceBytes.length);
+            incrementedNonceBytes = temp;
+        }
+
+        return incrementedNonceBytes;
+    }
+
     public static void verifyNonce(byte[] nonce_previous, byte[] nonce) {
         try {
-            if (!Arrays.equals(Util.intToBytes(Util.bytesToInt(nonce_previous) + 1), nonce)) {
+            if (!Arrays.equals(Util.incrementNonce(nonce_previous), nonce)) {
                 throw new RuntimeException("Nonce verification failed");
             }
         } catch (Exception e) {
