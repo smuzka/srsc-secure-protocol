@@ -5,7 +5,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
-import java.security.Security;
+import java.util.Arrays;
 
 import DSTP.DSTP;
 import SHP.messages.MessageType1;
@@ -60,12 +60,13 @@ public class SHPClientP2 {
                     cPair.getPublic().getEncoded());
             messageType3.send(out);
 
-            // aKeyAgree.doPhase(bPair.getPublic(), true);
-            // byte[] aShared = hash.digest(aKeyAgree.generateSecret());
-            // System.out.println("Alice: I generated\n" +
-            // Arrays.toString(aShared));
             MessageType4P2 messageType4 = new MessageType4P2(userPassword, userId, messageType3.getNonce4());
             messageType4.receive(in);
+
+            cKeyAgree.doPhase(Util.getPublicKeyFromBytes(messageType4.getYdhServer()), true);
+            byte[] cShared = hash.digest(cKeyAgree.generateSecret());
+            System.out.println("Client generated\n" +
+                    Arrays.toString(cShared));
 
             DSTP.init(messageType4.getCryptoConfig());
 

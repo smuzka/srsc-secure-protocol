@@ -73,7 +73,7 @@ public class SHPServerP2 {
             sKeyAgree.doPhase(Util.getPublicKeyFromBytes(messageType3.getYdhClient()), true);
 
             byte[] sShared = hash.digest(sKeyAgree.generateSecret());
-            System.out.println("Alice: I generated\n" +
+            System.out.println("Server generated\n" +
                     Arrays.toString(sShared));
 
             String cryptoConfig = ReadFile.readFileContent("srscProject/src/main/resources/cryptoconfig.txt");
