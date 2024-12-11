@@ -5,6 +5,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyPair;
@@ -14,6 +15,7 @@ import java.security.Security;
 import java.util.Arrays;
 
 import javax.crypto.KeyAgreement;
+import javax.crypto.spec.DHParameterSpec;
 
 import DSTP.DSTP;
 import SHP.messages.MessageType1;
@@ -61,22 +63,42 @@ public class SHPServerP2 {
                     messageType2.getNonce2(),
                     messageType2.getNonce3(),
                     new String(messageType1.getUserId()));
+
             messageType3.receive(in);
+            // Parametro para o gerador do Grupo de Cobertura de P
+            BigInteger g512 = new BigInteger(
+                    "153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7"
+                            + "749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b"
+                            + "410b7a0f12ca1cb9a428cc",
+                    16);
+            // Um grande numero primo P
+            BigInteger p512 = new BigInteger(
+                    "9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd387"
+                            + "44d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94b"
+                            + "f0573bf047a3aca98cdf3b",
+                    16);
+            DHParameterSpec dhParams = new DHParameterSpec(p512, g512);
 
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH", "BC");
-            keyGen.initialize(2048);
+            // keyGen.initialize(2048);
+            keyGen.initialize(dhParams);
             MessageDigest hash = MessageDigest.getInstance("SHA256", "BC");
             KeyAgreement sKeyAgree = KeyAgreement.getInstance("DH", "BC");
             KeyPair sPair = keyGen.generateKeyPair();
             sKeyAgree.init(sPair.getPrivate());
-
             sKeyAgree.doPhase(Util.getPublicKeyFromBytes(messageType3.getYdhClient()), true);
-
             byte[] sShared = hash.digest(sKeyAgree.generateSecret());
             System.out.println("Server generated\n" +
                     Arrays.toString(sShared));
 
-            String cryptoConfig = ReadFile.readFileContent("srscProject/src/main/resources/cryptoconfig.txt");
+            String cryptoConfig = ReadFile.readFileContent("srscProject/src/main/resources/ciphersuite.conf");
+            byte[] symetricKey = Arrays.copyOfRange(sShared, 0, 16);
+            byte[] macKey = Arrays.copyOfRange(sShared, 16, 32);
+            String symetricKeyHex = Util.toHex(symetricKey, 16);
+            String macKeyHex = Util.toHex(symetricKey, 16);
+
+            System.out.println("Symetric key: " + symetricKeyHex);
+            System.out.println("MAC key: " + macKeyHex);
             MessageType4P2 messageType4 = new MessageType4P2(
                     Util.incrementNonce(messageType3.getNonce4()),
                     Util.createNonce(), // nonce5
