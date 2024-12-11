@@ -3,7 +3,7 @@ import java.net.InetAddress;
 import DSTP.DSTP;
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedMulticastSocket;
-import SHP.SHPClient;
+import SHP.SHPClientP2;
 
 public class MulticastReceiver {
 
@@ -22,15 +22,14 @@ public class MulticastReceiver {
             System.exit(0);
         }
 
-        SHPClient.initConnection(
+        SHPClientP2.initConnection(
                 "srscProject/src/main/resources/",
                 "localhost",
                 12345,
                 9999,
                 "user0",
                 "Password!0",
-                "test"
-        );
+                "test");
 
         EncryptedMulticastSocket rs = new EncryptedMulticastSocket(port);
 

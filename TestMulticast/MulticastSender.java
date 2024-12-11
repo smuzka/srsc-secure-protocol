@@ -4,7 +4,7 @@ import java.util.Date;
 import DSTP.DSTP;
 import DSTP.EncryptedDatagramPacket;
 import DSTP.EncryptedMulticastSocket;
-import SHP.SHPServer;
+import SHP.SHPServerP2;
 
 public class MulticastSender {
 
@@ -25,10 +25,9 @@ public class MulticastSender {
             System.exit(0);
         }
 
-        SHPServer.initConnection(
+        SHPServerP2.initConnection(
                 "srscProject/src/main/resources/",
-                12345
-        );
+                12345);
 
         EncryptedMulticastSocket ms = new EncryptedMulticastSocket();
         do {

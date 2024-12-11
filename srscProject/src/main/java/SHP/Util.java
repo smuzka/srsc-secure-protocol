@@ -54,6 +54,19 @@ public class Util {
         return null;
     }
 
+    public static PublicKey getPublicKeyFromBytes(byte[] byteKey) {
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("DH", "BC");
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(byteKey);
+
+            return keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static void verifySignature(byte[] digitalSignature, byte[] data, String publicKeyString) {
         boolean signatureVerificatied = ECDSADigitalSignature.verifySignature(digitalSignature,
                 data, publicKeyString);
